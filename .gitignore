@@ -28,5 +28,15 @@
 
 # Executables
 *.exe
-*.out
 *.app
+
+.out
+*.vs
+
+_libs/2c_common
+_libs/encoding
+_libs/marty_cpp
+_libs/sfmt
+_libs/umba
+
+/_prj_msvc/*.user
