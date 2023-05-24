@@ -31,8 +31,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\umba-tr\2c.cpp.cpp" />
-    <ClCompile Include="..\src\umba-tr\mimes.cpp.cpp" />
+    <ClCompile Include="..\src\2c.cpp" />
+    <ClCompile Include="..\src\mimes.cpp" />
     <ClCompile Include="..\_libs\sfmt\umba_lout.cpp" />
     <ClCompile Include="..\_libs\encoding\encoding.cpp" />
     <ClCompile Include="..\_libs\encoding\compact_enc_det\compact_enc_det.cc" />

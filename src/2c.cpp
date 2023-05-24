@@ -1,5 +1,16 @@
+/*! \file
+    \brief Утилита umba-2c - конвертер файлов в С-массивы
+ */
+
+// Должна быть первой
 #include "umba/umba.h"
+//---
+
+//#-sort
 #include "umba/simple_formatter.h"
+#include "umba/char_writers.h"
+//#+sort
+
 
 
 #include <iostream>
@@ -16,11 +27,23 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "logoptions.h"
+#include "textUtils.h"
+
+#include "umba/filename.h"
+#include "umba/filesys.h"
+#include "umba/debug_helpers.h"
+#include "umba/cli_tool_helpers.h"
+
+
+#include "marty_cpp/marty_cpp.h"
+#include "marty_cpp/src_normalization.h"
+
 
 #if defined(WIN32) || defined(_WIN32)
     #include <windows.h>
 #endif
+
+#include "cppHelpers.h"
 
 
 
@@ -28,54 +51,59 @@ umba::StdStreamCharWriter coutWriter(std::cout);
 umba::StdStreamCharWriter cerrWriter(std::cerr);
 umba::NulCharWriter       nulWriter;
 
-umba::SimpleFormatter logMsg(&coutWriter);
-umba::SimpleFormatter logErr(&cerrWriter);
-umba::SimpleFormatter logNul(&nulWriter);
+umba::SimpleFormatter umbaLogStreamErr(&cerrWriter);
+umba::SimpleFormatter umbaLogStreamMsg(&cerrWriter);
+umba::SimpleFormatter umbaLogStreamNul(&nulWriter);
 
-bool logWarnType   = true;
-bool logGccFormat  = false;
-bool logSourceInfo = false;
+bool umbaLogGccFormat   = false; // true;
+bool umbaLogSourceInfo  = false;
 
-std::string exeFullName = "2c";
-std::string progBinPath     = ".";
-std::string progRootPath    = ".";
+
+// std::string exeFullName = "2c";
+// std::string progBinPath     = ".";
+// std::string progRootPath    = ".";
 //std::string progConfPath    = ".\\conf" ;
 //std::string progIncludePath = ".\\include";
 
 
-LogOptions   logOptions;
+//LogOptions   logOptions;
 
 
-#include "logerr.h"
+// #include "logerr.h"
+//  
+//  
+// #include "rdlc-core/trims.h"
+// #include "rdlc-core/splits.h"
+// #include "rdlc-core/cpp.h"
+// #include "rdlc-core/case.h"
+// #include "rdlc-core/isa.h"
+// #include "rdlc-core/utils.h"
+// #include "rdlc-core/fsUtils.h"
+// #include "rdlc-core/prog.h"
+// #include "rdlc-core/cli_impl.h"
+// #include "rdlc-core/textUtils.h"
 
-
-#include "rdlc-core/trims.h"
-#include "rdlc-core/splits.h"
-#include "rdlc-core/cpp.h"
-#include "rdlc-core/case.h"
-#include "rdlc-core/isa.h"
-#include "rdlc-core/utils.h"
-#include "rdlc-core/fsUtils.h"
-#include "rdlc-core/prog.h"
-#include "rdlc-core/cli_impl.h"
-#include "rdlc-core/textUtils.h"
-
-#include "_2cver.h"
-#include "encoding.h"
+#include "app_ver_config.h"
+// #include "_2cver.h"
 #include "mimes.h"
 #include "base64.h"
+#include "encoding/encoding.h"
+
 
 #include "2c_common/_2c_xor_encrypt.h"
 
 std::string inputFilename;
 std::string outputFilename;
 
-#include "print_help.h"
+#include "log.h"
+// #include "print_help.h"
 
 
 bool                    quet           = false;
-std::set<std::string>   argsNeedHelp;
-bool                    hasHelpOption  = false;
+//std::set<std::string>   argsNeedHelp;
+//bool                    hasHelpOption  = false;
+
+bool                    bOverwrite = false;
 
 
 bool disableEndLinefeed = false;
@@ -122,6 +150,9 @@ unsigned      xorEncSeed    = 0;
 unsigned      xorEncInc     = 0;
 
 
+#include "arg_parser.h"
+
+
 
 inline
 int absDelta( int i1, int i2 )
@@ -131,7 +162,7 @@ int absDelta( int i1, int i2 )
 }
 
 //-----------------------------------------------------------------------------
-
+#if 0
 // 0 - ok, 1 normal stop, -1 - error
 int parseArg( std::string a, ICommandLineOptionCollector *pCol, bool fBuiltin, bool ignoreInfos)
 {
@@ -755,7 +786,6 @@ int parseArg( std::string a, ICommandLineOptionCollector *pCol, bool fBuiltin, b
 }
 
 
-
 class CommandLineOptionCollectorImpl : public CommandLineOptionCollectorImplBase
 {
 protected:
@@ -767,9 +797,12 @@ protected:
 
 };
 
-int main(int argc, char* argv[])
-   {
+#endif
 
+
+int main(int argc, char* argv[])
+{
+    #if 0
     using std::cin;
     using std::cout;
     using std::cerr;
@@ -805,13 +838,74 @@ int main(int argc, char* argv[])
             return 0;
         }
     }
+    #endif
+
+
+    auto argsParser = umba::command_line::makeArgsParser( ArgParser()
+                                                        , CommandLineOptionCollector()
+                                                        , argc, argv
+                                                        , umba::program_location::getProgramLocation
+                                                            ( argc, argv
+                                                            , false // useUserFolder = false
+                                                            //, "" // overrideExeName
+                                                            )
+                                                        );
+
+    // Force set CLI arguments while running under debugger
+    if (umba::isDebuggerPresent())
+    {
+        argsParser.args.clear();
+        argsParser.args.push_back("@../umba-tr.rsp");
+        argsParser.args.push_back("../test-tr.json");
+
+        //argsParser.args.push_back("@..\\make_sources_brief.rsp");
+        // argsParser.args.push_back(umba::string_plus::make_string(""));
+        // argsParser.args.push_back(umba::string_plus::make_string(""));
+        // argsParser.args.push_back(umba::string_plus::make_string(""));
+    }
+
+    //programLocationInfo = argsParser.programLocationInfo;
+
+    // try
+    // {
+        // Job completed - may be, --where option found
+        if (argsParser.mustExit)
+            return 0;
+       
+        // if (!argsParser.quet)
+        // {
+        //     printNameVersion();
+        // }
+       
+        if (!argsParser.parseStdBuiltins())
+            return 1;
+        if (argsParser.mustExit)
+            return 0;
+       
+        if (!argsParser.parse())
+            return 1;
+        if (argsParser.mustExit)
+            return 0;
+    // }
+    // catch(const std::exception &e)
+    // {
+    //     LOG_ERR_OPT << e.what() << "\n";
+    //     return -1;
+    // }
+    // catch(const std::exception &e)
+    // {
+    //     LOG_ERR_OPT << "command line arguments parsing error" << "\n";
+    //     return -1;
+    // }
+
 
     //if (hasHelpOption)
 
     if (!quet  /* && !hasHelpOption */ )
     {
-        printNameVersion();
+        //printNameVersion();
         //LOG_MSG_OPT<<"\n";
+        umba::cli_tool_helpers::printNameVersion(umbaLogStreamMsg);
     }
 
     #if 0
@@ -867,7 +961,6 @@ int main(int argc, char* argv[])
             optFile.close();
         }
     }
-    #endif
 
     for( const auto & a : args)
     {
@@ -875,6 +968,9 @@ int main(int argc, char* argv[])
         if (paRes)
            return paRes<0 ? 1 : 0;
     }
+
+    #endif
+
 
     if (inputFilename.empty())
     {
@@ -886,27 +982,27 @@ int main(int argc, char* argv[])
     {
         //cerr<<"No output file name taken\n";
         //return 1;
-        outputFilename = getPathName( inputFilename );
+        outputFilename = umba::filename::getPathFile( inputFilename );
         //defaultOutputUsed = true;
-        std::string ext = getFileExtention( inputFilename );
+        std::string ext = umba::filename::getFileExtention( inputFilename );
         if (!ext.empty())
             outputFilename += std::string("_") + ext;
     }
 
-    std::string curOutputExt = getFileExtention( outputFilename );
-    toLower(curOutputExt);
+    std::string curOutputExt = umba::filename::getFileExtention( outputFilename );
+    // toLower(curOutputExt); //NOTE: !!! А оно надо, toLower?
 
     if (curOutputExt.empty() || curOutputExt==".")
     {
-        outputFilename = appendExtention( outputFilename, "c" );
+        outputFilename = umba::filename::appendExtention( outputFilename, std::string("c") );
     }
 
     if (cname.empty())
     {
         if (!dontKeepExt)
-           cname = makeCppName(getNameFromFull(inputFilename));
+           cname = makeCppName(umba::filename::getFileName(inputFilename));
         else
-           cname = makeCppName(getFileName(inputFilename));
+           cname = makeCppName(umba::filename::getName(inputFilename));
     }
 
     if (!cname.empty())
@@ -919,7 +1015,7 @@ int main(int argc, char* argv[])
     {
         if (resourceFileName.empty())
         {
-            resourceFileName = getNameFromFull(inputFilename);
+            resourceFileName = umba::filename::getFileName(inputFilename);
         }
     }
 
@@ -927,7 +1023,10 @@ int main(int argc, char* argv[])
     {
         if (mimeType.empty())
         {
-            std::string srcExt = toLower(getFileExtention(inputFilename));
+            //NOTE: !!! А оно надо, toLower?
+            //std::string srcExt = toLower(umba::filename::getFileExtention(inputFilename));
+            // std::string srcExt = umba::filename::getFileExtention(inputFilename);
+            std::string srcExt = marty_cpp::toLower(umba::filename::getFileExtention(inputFilename));
             if (!srcExt.empty() && srcExt[0]!='.')
                srcExt = std::string(".") + srcExt;
 
@@ -962,14 +1061,19 @@ int main(int argc, char* argv[])
     std::string data;
 
     {
-        readBinaryFile( input, dataReaded );
+        {
+            std::vector<char> fileDataVec;
+            umba::filesys::readFile(static_cast<std::istream&>(input), fileDataVec);
+            dataReaded = std::string(fileDataVec.data(), fileDataVec.size());
+        }
+        // readBinaryFile( input, dataReaded );
 
         if (!binInput)
         {
             if (outputEnc.empty())
                 outputEnc = "UTF-8";
 
-            EncodingsApi* pEncApi = getEncodingsApi();
+            encoding::EncodingsApi* pEncApi = encoding::getEncodingsApi();
            
             if (inputEnc.empty())
             {
@@ -1024,16 +1128,23 @@ int main(int argc, char* argv[])
     {
         if (compressWhitespaces)
         {
-            dataReaded = textCompress( dataReaded, " \t" );
+            dataReaded = textCompress(dataReaded, " \t");
             trimLines = true;
+        }
+
+        if (trimLines)
+        {
+            dataReaded = marty_cpp::stripTextTrailingSpaces(dataReaded);
         }
 
         std::vector< std::string > lines;
         std::string inputSep;
-        textSplitToLines( dataReaded, lines, inputSep );
+        textSplitToLines(dataReaded, lines, inputSep);
         if (trimLines)
-           rtrim(lines);
-
+        {
+            //marty_cpp::stripLineTrailingSpaces(lines);
+            //rtrim(lines);
+        }
         if (outputLineSep.empty() || outputLineSep=="auto")
             outputLineSep = inputSep;
 
@@ -1152,8 +1263,9 @@ int main(int argc, char* argv[])
             if (!decFormat)
                chStr = std::string("0x") + chStr;
 
-            if ((numOfLineItems+1)==lineSize)
+            if ((numOfLineItems+1)==lineSize) // текущая строка после добавления элемента достигнет лимита
             {
+
                 curFormattedLine.append(chStr);
                 formattedLines.push_back(curFormattedLine);
                 curFormattedLine.clear();
@@ -1171,11 +1283,22 @@ int main(int argc, char* argv[])
 
         if (!formattedLines.empty())
         {
-            rtrim(formattedLines[formattedLines.size()-1], " ,");
+            // Удаляем лишние пробелы и запятые в конце последней строки
+            //rtrim(formattedLines[formattedLines.size()-1], " ,");
+            std::string &lastLine = formattedLines.back();
+            auto i=lastLine.size();
+            for(; i!=0; --i)
+            {
+                char lastChar = lastLine[i-1];
+                if (lastChar==' ' || lastChar==',')
+                    continue;
+                break;
+            }
+            lastLine.erase(i, lastLine.npos);
         }
 
     }
-    else
+    else // форматируем как строку
     {
         dataSize = 0;
 
@@ -1184,7 +1307,7 @@ int main(int argc, char* argv[])
             char ch = data[inputDataPos];
             ++dataSize;
 
-            std::string chStr = cEscape( ch );
+            std::string chStr = marty_cpp::cEscapeString( std::string(1,ch) );
 
             size_t len = indent.size() + 2 + curFormattedLine.size() + chStr.size();
 
@@ -1213,33 +1336,6 @@ int main(int argc, char* argv[])
 
         ++dataSize; // terminating  zero
 
-        //curFormattedLine
-        /*
-        for( auto l : inputLines )
-        {
-            size_t i = 0, sz = l.size();
-            curFormattedLine.clear();
-            for( ; i!=sz; ++i )
-            {
-                ++dataSize;
-                std::string chStr = cEscape( l[i] );
-                size_t len = indent.size() + 2 + curFormattedLine.size() + chStr.size();
-                if (len>lineSize && l[i]!='\r' && l[i]!='\n')
-                {
-                    formattedLines.push_back(curFormattedLine);
-                    curFormattedLine = chStr;
-                }
-                else
-                {
-                    curFormattedLine.append(chStr);
-                }
-            } // for
-
-            if (!curFormattedLine.empty())
-               formattedLines.push_back(curFormattedLine);
-        } // for
-
-        */
     }
 
     // отформатировали
