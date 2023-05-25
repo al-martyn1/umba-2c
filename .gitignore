@@ -32,6 +32,7 @@
 
 .out
 *.vs
+test_res/*
 
 _libs/2c_common
 _libs/encoding
@@ -40,3 +41,4 @@ _libs/sfmt
 _libs/umba
 
 /_prj_msvc/*.user
+/test_res

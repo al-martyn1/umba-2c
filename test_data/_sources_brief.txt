@@ -1,0 +1,95 @@
+Brief Description for Project Sources
+-------------------------------------
+
+
+# TestsWinGui
+TestsWinGui/TestWinDrawContext01.cpp     - Общий тест основных методов IDrawContext, проверка алгоритма склеивания кнопок,
+                                           разметка кнопок на зоны.
+TestsWinGui/TestWinDrawContext02.cpp     - Разные неинтеррактивные тесты (было лень делать консольное) - чтение
+                                           разметки клавиатуры, частичные тесты генератора enum'ов, (де)сериализации, и
+                                           тп.
+TestsWinGui/TestWinDrawContext03.cpp     - Вычитка физ. раскладки клавиатуры из конфига, размещение клавиш, склеивание
+                                           клавиш, сплит клавиш, отображение получившегося поля клавиш, отображение
+                                           координат клавиши под курсором.
+TestsWinGui/TestWinDrawContext04.cpp     - Аналогично TestWinDrawContext03, + вычитка системной раскладки клавиатуры и
+                                           отображение названий клавиш.
+TestsWinGui/TestWinDrawContext05.cpp     - Начинаем рисовать клавиатуру в условиях, приближенных к реальным. Присунут
+                                           fingers-config, colors-config.
+TestsWinGui/TestWinDrawContext06.cpp     - Отрисована многоцветная клавиатура.
+TestsWinGui/TestWinDrawContext07.cpp     - Клава с названиями вирт клавиш.
+TestsWinGui/TestWinDrawContext08.cpp     - Выносим код переноса регионов в раскладку и код рисования надписей в либу.
+TestsWinGui/TestWinDrawContext09.cpp     - Компонуем загрузу конфигов в одно место.
+TestsWinGui/TestWinDrawContext10.cpp     - Начинаем оформлять главное окно.
+TestsWinGui/TestWinDrawContext11.cpp     - Выделил код рисования сцены в несколько основных функций рисования
+                                           элементов сцены. Сделал кеширование отрисованной клавиатуры.
+TestsWinGui/TestWinDrawContext12.cpp     - Переделываем рисование на рисование в MemDc - чтобы ничего не мерцало. Надо бы
+                                           ещё приделать ожидание "обратного хода луча", чтобы вообще было всё красиво.
+
+# _generators
+_generators/keys_enum_win.cpp            - Генерация enum и сериализации для Win32 виртуальных кодов клавиш.
+_generators/scene_element_option_enum.cpp - Генерация enum и сериализации для идентификаторов толщин элементов UI.
+_generators/scene_element_option_enum_prepare.cpp - Генерация входа для генерации enum ESceneElementWidth.
+
+# marty_rcfs
+marty_rcfs/rcfs_flags.cpp                - Генерация enum и сериализации атрибутов файлов/каталогов для Resource File System (RCFS).
+
+# tests
+tests/test001.cpp                        - Тест апдейта одного JSON из другого.
+tests/test002.cpp                        - Тест readFileHelper.
+tests/test003.cpp                        - Тест readKeyboardMechanicalLayoutJson.
+tests/test004.cpp                        - Тест readKeyboardMechanicalLayoutJsonAndApplyCascadeGeometryOptions.
+tests/test005.cpp                        - Получение списка установленных раскладок клавиатуры, имени DLL и описания
+                                           раскладки.
+tests/test006.cpp                        - Вывод сведений о раскладке клавиатуры.
+tests/test007.cpp                        - Загрузка раскладки через CKLL и вывод ассоциаций VK -> symbols без учета
+                                           клавиш-модификаторов.
+tests/test008.cpp                        - Вывод всех имеющихся в системе раскладок, их идентификаторов языка, и имени
+                                           языка.
+tests/test009.cpp                        - Тестирование набора виртуальных кнопок - typedef std::set<EVirtualKey> EVirtualKeySet, а также
+                                           enum флагов.
+tests/test010.cpp                        - Начинаем выдергивать данные из PKBDTABLES и перетаскивать их в более
+                                           удобоваримую форму.
+tests/test011.cpp                        - Выводим только данные по скан кодам.
+tests/test012.cpp                        - Продолжаем вытягивать данные по раскладке и адаптировать их для применения
+                                           в кл. тренажере.
+tests/test013.cpp                        - Строим отображение ScanCode->VK по всем раскладкам.
+tests/test014.cpp                        - Строим отображение VK->ScanCode по 409 раскладке и дополняем по остальным
+                                           (используется для генерации getStdVkToScanCodeMap.h).
+tests/test015.cpp                        - Раскладка кнопки - тестируем чтение конфига, в тч проверяем
+                                           функциональность макросов из umba/macros.h.
+tests/test016.cpp                        - Утилита подбора ближайшего цвета из палитры именованных цветов (нужно,
+                                           чтобы попробовать найти близкие именованные цвета из набора SVG/CSS).
+tests/test017.cpp                        - Тестируем хелперы для тригонометрии (mathHelpers.h - в основном котовасия с углами
+                                           и их нормализацией - 180/360/-180/-360 etc, и преобразование из/в радианы).
+tests/test018.cpp                        - Пытаемся узнать название клавиатуры (не вышло).
+tests/test019.cpp                        - Тестируем trie (префиксное дерево marty::adt::trie).
+tests/test020.cpp                        - Итерация по символам при помощи trie.
+tests/test021.cpp                        - Вытянули из раскладки все данные в одном флакончике.
+tests/test022.cpp                        - Выводим список раскладок по приоритету.
+tests/test023.cpp                        - Установленные раскладки с учетом приоритета.
+tests/test024.cpp                        - Делаем данные по всем символам во всех раскладках.
+tests/test025.cpp                        - Формируем unordered_map из ранее сгенеренного списка символов.
+tests/test026.cpp                        - Делаем данные по всем символам во всех раскладках - версия 2.
+tests/test027.cpp                        - Делаем данные по всем символам во всех раскладках - версия 3 - в типа двоичный
+                                           вид.
+tests/test028.cpp                        - Пилим XOR-кодирование ресурсов.
+tests/test029.cpp                        - Начинаем пилить RC файловую систему.
+tests/test030.cpp                        - Учимся итерироваться по символам, как в по wchar_t, так и по char в UTF-8.
+tests/test031.cpp                        - Итеририруемся по символам с использованием интерфейса ISymbolTraits.
+tests/test032.cpp                        - Тестируем cEscapeString, нормализацию CR LF, нормализацию trailing spaces, condenseSpacesToTabs,
+                                           normalizeIndents.
+tests/test033.cpp                        - Тестирование генератора enum'ов marty_cpp::enum_generate_*.
+tests/test034.cpp                        - Тестируем sort_includes.
+tests/test035.cpp                        - Тестируем marty_tr/locales.h.
+tests/test035_bak.cpp                    - Выводим список языков и их буквенные обозначения.
+tests/test036.cpp                        - Тестируем marty_tr (выделил в отдельный тест).
+tests/test037.cpp                        - Генерируем эталонный en-US файл перевода для языков и локаций.
+tests/test038.cpp                        - Тестируем umba::formatMessage.
+
+# tmp/robo-tests
+tmp/robo-tests/robot01.cpp               - 
+tmp/robo-tests/robot02.cpp               - 
+
+# tools/marty-tr
+tools/marty-tr/marty-tr.cpp              - Утилита marty-tr - сборка единого файла перевода из дерева каталогов/файлов
+                                           перевода.

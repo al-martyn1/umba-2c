@@ -157,7 +157,7 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
             
-            bOverwrite = boolVal;
+            appConfig.bOverwrite = boolVal;
             return 0;
         }
 
@@ -211,77 +211,77 @@ int operator()( const std::string                               &a           //!
         {
             if (argsParser.hasHelpOption) return 0;
 
-            dontKeepExt = true;
+            appConfig.dontKeepExt = true;
         }
         else if (opt.isOption("input-bin") || opt.isOption("bin") || opt.isOption('b') || opt.setDescription("Input is binary"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            binInput = true;
+            appConfig.binInput = true;
         }
         else if (opt.isOption("input-text") || opt.isOption("text") || opt.isOption('t') || opt.setDescription("Input is text"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            binInput = false;
+            appConfig.binInput = false;
         }
         else if ( opt.isOption("output-string") || opt.isOption("string") || opt.isOption('s') 
                || opt.setDescription("Generate output as C-string"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputAsString = true;
+            appConfig.outputAsString = true;
         }
         else if ( opt.isOption("output-array") || opt.isOption("array") || opt.isOption('a') 
                || opt.setDescription("Generate output as byte array"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputAsString = false;
+            appConfig.outputAsString = false;
         }
         else if ( opt.isOption("size") // || opt.isOption('a') 
                || opt.setDescription("Add resource size variable"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            addResourceFileSize = true;
+            appConfig.addResourceFileSize = true;
         }
         else if (opt.isOption("crlf") || opt.setDescription("Use CRLF as line separator"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputLineSep = "\r\n";
+            appConfig.outputLineSep = "\r\n";
         }
         else if (opt.isOption("cr") || opt.setDescription("Use CR as line separator"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputLineSep = "\r";
+            appConfig.outputLineSep = "\r";
         }
         else if (opt.isOption("lf") || opt.setDescription("Use LF as line separator"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputLineSep = "\n";
+            appConfig.outputLineSep = "\n";
         }
         else if (opt.isOption("lfcr") || opt.setDescription("Use LFCR as line separator"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputLineSep = "\n\r";
+            appConfig.outputLineSep = "\n\r";
         }
         else if ( opt.isOption("linefeed-auto") || opt.isOption("auto-linefeed") || opt.isOption("auto") || opt.isOption('A') 
                || opt.setDescription("Use line separator from source file"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            outputLineSep = "auto";
+            appConfig.outputLineSep = "auto";
         }
         else if (opt.isOption("no-end-linefeed") || opt.isOption('L') || opt.setDescription("Do not add linefeed at the end of text"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            disableEndLinefeed = true;
+            appConfig.disableEndLinefeed = true;
         }
         else if (opt.setParam("NAME", "") || opt.isOption("name") || opt.isOption('N') || opt.setDescription("Set C-array/string name"))
         {
@@ -292,7 +292,7 @@ int operator()( const std::string                               &a           //!
                 LOG_ERR_OPT<<"name option - value not taken (--name)\n";
                 return -1;
             }
-            cname = opt.optArg;
+            appConfig.cname = opt.optArg;
         }
         else if ( opt.setParam("?FILENAME", "") || opt.isOption("filename") || opt.isOption('F') 
                || opt.setDescription("Add resource file name variable. Parameter value is optional"))
@@ -300,8 +300,8 @@ int operator()( const std::string                               &a           //!
             if (argsParser.hasHelpOption) return 0;
 
             if (opt.hasArg())
-               resourceFileName = opt.optArg;
-            addResourceFileName = true;
+               appConfig.resourceFileName = opt.optArg;
+            appConfig.addResourceFileName = true;
         }
         else if ( opt.setParam("?MIMETYPE", "") || opt.isOption("mime-type") || opt.isOption("mime") || opt.isOption('M') 
                || opt.setDescription("Set mime type as taken. If no mime type explicitly taken, it will be autodetected"))
@@ -309,23 +309,27 @@ int operator()( const std::string                               &a           //!
             if (argsParser.hasHelpOption) return 0;
 
             if (opt.hasArg())
-               mimeType = opt.optArg;
-            addMimeType = true;
+               appConfig.mimeType = opt.optArg;
+            appConfig.addMimeType = true;
         }
-        else if (opt.setParam("?DATETIME", "") || opt.isOption("last-modified") || opt.isOption('I') || opt.setDescription("Set last-modified"))
+        else if ( opt.setParam("?DATETIME", "") || opt.isOption("last-modified") || opt.isOption('I')
+               || opt.setDescription( "Set last-modified. If not explicitly taken, it will be generated by strftime(\"%a, %d %b %Y %H:%M:%S GMT\").\n"
+                                      "Autogenerated datetime is in HTTP/Header/Last-Modified compatible format"
+                                    )
+                )
         {
             if (argsParser.hasHelpOption) return 0;
 
             if (opt.hasArg())
-               lastModified = opt.optArg;
-            addLastModified = true;
+               appConfig.lastModified = opt.optArg;
+            appConfig.addLastModified = true;
         }
         else if ( opt.setParam(true) || opt.setInitial(false) || opt.isOption("base64") || opt.isOption('B') 
                || opt.setDescription("Encode input file into base64"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            if (!opt.getParamValue( base64, errMsg ))
+            if (!opt.getParamValue(appConfig.base64, errMsg ))
             {
                 LOG_ERR_OPT<<errMsg<<"\n";
                 return -1;
@@ -377,10 +381,10 @@ int operator()( const std::string                               &a           //!
             if (keySize==0)
             {
                 // No XOR encryption, reset 
-                xorEncKeySize  = _2c::EKeySize::NoEncryption;
-                xorEncSeed     = 0;
-                xorEncInc      = 0;
-                outputAsString = true;
+                appConfig.xorEncKeySize  = _2c::EKeySize::NoEncryption;
+                appConfig.xorEncSeed     = 0;
+                appConfig.xorEncInc      = 0;
+                //appConfig.outputAsString = true; //
             }
             else
             {
@@ -394,7 +398,7 @@ int operator()( const std::string                               &a           //!
                     xorOptionsVec.push_back("0");
 
                 bool bValid = false;
-                xorEncSeed = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[1], rng, &bValid);
+                appConfig.xorEncSeed = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[1], rng, &bValid);
                 if (!bValid)
                 {
                     LOG_ERR_OPT<<"XOR encryption option - invalid seed value (--xor=KeySize[,Seed[,Inc]])"<<"\n";
@@ -402,16 +406,16 @@ int operator()( const std::string                               &a           //!
                 }
 
                 bValid = false;
-                xorEncInc = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[2], rng, &bValid);
+                appConfig.xorEncInc = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[2], rng, &bValid);
                 if (!bValid)
                 {
                     LOG_ERR_OPT<<"XOR encryption option - invalid key increment value (--xor=KeySize[,Seed[,Inc]])"<<"\n";
                     return -1;
                 }
 
-                xorEncKeySize = ksz;
+                appConfig.xorEncKeySize = ksz;
 
-                outputAsString = false;
+                appConfig.outputAsString = false;
             }
 
         }
@@ -420,7 +424,7 @@ int operator()( const std::string                               &a           //!
         {
             if (argsParser.hasHelpOption) return 0;
 
-            if (!opt.getParamValue( base64LineLen, errMsg ))
+            if (!opt.getParamValue(appConfig.base64LineLen, errMsg ))
             {
                 LOG_ERR_OPT<<errMsg<<"\n";
                 return -1;
@@ -431,7 +435,7 @@ int operator()( const std::string                               &a           //!
         {
             if (argsParser.hasHelpOption) return 0;
 
-            if (!opt.getParamValue( base64Filling, errMsg ))
+            if (!opt.getParamValue(appConfig.base64Filling, errMsg ))
             {
                 LOG_ERR_OPT<<errMsg<<"\n";
                 return -1;
@@ -442,16 +446,16 @@ int operator()( const std::string                               &a           //!
             if (argsParser.hasHelpOption) return 0;
 
             if (opt.hasArg())
-               className = opt.optArg;
-            generateClass = true;
+                appConfig.className = opt.optArg;
+            appConfig.generateClass = true;
         }
         else if (opt.isOption("header") || opt.setDescription("* Generate header file (.h) instead of .c"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            generateHeader = true;
+            appConfig.generateHeader = true;
         }
-        else if (opt.isOption("class-namespace") || opt.setDescription("* Generate class into namespace(s)"))
+        else if (opt.isOption("class-namespace") || opt.isOption("namespace") || opt.setDescription("* Generate class into namespace(s)"))
         {
             if (argsParser.hasHelpOption) return 0;
 
@@ -461,13 +465,13 @@ int operator()( const std::string                               &a           //!
         {
             if (argsParser.hasHelpOption) return 0;
 
-            staticArray = true;
+            appConfig.staticArray = true;
         }
         else if (opt.isOption("non-const") || opt.isOption('C') || opt.setDescription("Generate non-const data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            nonConstArray = true;
+            appConfig.nonConstArray = true;
         }
         else if ( opt.setParam("SIZE", 16, 16, 160) || opt.setInitial(16) || opt.isOption("line-size") || opt.isOption('l') 
                || opt.setDescription("Set max line size or number of array items per line"))
@@ -480,7 +484,7 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
 
-            lineSize = (size_t)intVal;
+            appConfig.lineSize = (size_t)intVal;
 
         }
         else if (opt.isOption("input-encoding") || opt.isOption("input-enc") || opt.setDescription("Set input encoding"))
@@ -493,7 +497,7 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
 
-            inputEnc = opt.optArg;
+            appConfig.inputEnc = opt.optArg;
         }
         else if (opt.isOption("target-encoding") || opt.isOption("target-enc") || opt.setDescription("Set target encoding"))
         {
@@ -505,32 +509,32 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
 
-            outputEnc = opt.optArg;
+            appConfig.outputEnc = opt.optArg;
         }
         else if (opt.isOption("dec") || opt.isOption('D') || opt.setDescription("Use decimal format for array items (default is hex)"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            decFormat = true;
+            appConfig.decFormat = true;
         }
         else if (opt.isOption("hex") || opt.isOption('X') || opt.setDescription("Use hexadecimal format for array items (default)"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            decFormat = false;
+            appConfig.decFormat = false;
         }
         else if ( opt.isOption("compress-ws") || opt.isOption('R') 
                || opt.setDescription("Compress whitespaces - reduce multiple WS (\\s, \\t) to single"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            compressWhitespaces = true;
+            appConfig.compressWhitespaces = true;
         }
         else if (opt.isOption("trim") || opt.isOption("rtrim") || opt.isOption('T') || opt.setDescription("Trim lines at right"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            trimLines = true;
+            appConfig.trimLines = true;
         }
         else if (opt.isOption("list-encodings") || opt.setDescription("List of supported encodings"))
         {
@@ -653,7 +657,14 @@ int operator()( const std::string                               &a           //!
     
     }
 
-    outputFilename = makeAbsPath(a);
+    if (inputFilename.empty())
+    {
+        inputFilename = makeAbsPath(a);
+    }
+    else
+    {
+        outputFilename = makeAbsPath(a);
+    }
 
     return 0;
 

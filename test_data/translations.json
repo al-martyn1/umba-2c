@@ -1,0 +1,19 @@
+{
+  "en-US": {
+    "common": {
+      "Hello world!": "Hello translated world 409!",
+      "Hello another world!": "Hello translated another world 409!"
+    },
+    "marty-tr/language-location": {
+      "Afgha nistan": "Hello translated world 419!"
+    }
+  },
+  "ru-RU": {
+    "common": {
+      "Hello world!": "Hello translated world 419!"
+    },
+    "marty-tr/language-location": {
+      "Afgha nistan": "Hello translated world 419!"
+    }
+  }
+}
