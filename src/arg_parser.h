@@ -246,43 +246,84 @@ int operator()( const std::string                               &a           //!
 
             appConfig.addResourceFileSize = true;
         }
-        else if (opt.isOption("crlf") || opt.setDescription("Use CRLF as line separator"))
+        else if (opt.isOption("crlf") || opt.setDescription("Use CRLF as line separator in data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.outputLineSep = "\r\n";
+            //appConfig.outputLineSep = "\r\n";
+            appConfig.outputLineFeed = marty_cpp::ELinefeedType::crlf;
         }
-        else if (opt.isOption("cr") || opt.setDescription("Use CR as line separator"))
+        else if (opt.isOption("cr") || opt.setDescription("Use CR as line separator in data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.outputLineSep = "\r";
+            // appConfig.outputLineSep = "\r";
+            appConfig.outputLineFeed = marty_cpp::ELinefeedType::cr;
         }
-        else if (opt.isOption("lf") || opt.setDescription("Use LF as line separator"))
+        else if (opt.isOption("lf") || opt.setDescription("Use LF as line separator in data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.outputLineSep = "\n";
+            //appConfig.outputLineSep = "\n";
+            appConfig.outputLineFeed = marty_cpp::ELinefeedType::lf;
         }
-        else if (opt.isOption("lfcr") || opt.setDescription("Use LFCR as line separator"))
+        else if (opt.isOption("lfcr") || opt.setDescription("Use LFCR as line separator in data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.outputLineSep = "\n\r";
+            //appConfig.outputLineSep = "\n\r";
+            appConfig.outputLineFeed = marty_cpp::ELinefeedType::lfcr;
         }
-        else if ( opt.isOption("linefeed-auto") || opt.isOption("auto-linefeed") || opt.isOption("auto") || opt.isOption('A') 
-               || opt.setDescription("Use line separator from source file"))
+        // else if ( opt.isOption("linefeed-auto") || opt.isOption("auto-linefeed") || opt.isOption("auto") || opt.isOption('A') 
+        //        || opt.setDescription("Use line separator from source file"))
+        // {
+        //     if (argsParser.hasHelpOption) return 0;
+        //  
+        //     appConfig.outputLineSep = "auto";
+        // }
+        else if ( opt.setParam("LINEFEED",umba::command_line::OptionType::optString)
+               || opt.isOption("linefeed") || opt.isOption("LF") || opt.isOption('L')
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Set line separator for data. LINEFEED is one of: CR/LF/CRLF/LFCR/KEEP. If KEEP value taken, no linefeed conversion will be performed."
+                                     // #if defined(WIN32) || defined(_WIN32)
+                                     // "Default is CRLF."
+                                     // #else
+                                     // "Default is LF."
+                                     // #endif
+                                    )
+                )
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.outputLineSep = "auto";
-        }
-        else if (opt.isOption("no-end-linefeed") || opt.isOption('L') || opt.setDescription("Do not add linefeed at the end of text"))
-        {
-            if (argsParser.hasHelpOption) return 0;
+            if (!opt.getParamValue(strVal,errMsg))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
 
-            appConfig.disableEndLinefeed = true;
+            if (marty_cpp::toLower(strVal)=="keep")
+            {
+                strVal = "detect";
+            }
+            // detect
+            
+            marty_cpp::ELinefeedType tmp = marty_cpp::enum_deserialize( strVal, marty_cpp::ELinefeedType::invalid );
+            if (tmp==marty_cpp::ELinefeedType::invalid)
+            {
+                LOG_ERR_OPT<<"Invalid linefeed option value: "<<strVal<<"\n";
+                return -1;
+            }
+
+            appConfig.outputLineFeed = tmp;
+
+            return 0;
         }
+        // else if (opt.isOption("no-end-linefeed") || opt.isOption('L') || opt.setDescription("Do not add linefeed at the end of text"))
+        // {
+        //     if (argsParser.hasHelpOption) return 0;
+        //  
+        //     appConfig.disableEndLinefeed = true;
+        // }
         else if (opt.setParam("NAME", "") || opt.isOption("name") || opt.isOption('N') || opt.setDescription("Set C-array/string name"))
         {
             if (argsParser.hasHelpOption) return 0;
@@ -324,6 +365,9 @@ int operator()( const std::string                               &a           //!
                appConfig.lastModified = opt.optArg;
             appConfig.addLastModified = true;
         }
+
+        // else if ( opt.setParam("?FILL") || opt.setInitial(false) || opt.isOption("base64") || opt.isOption('B') 
+        //        || opt.setDescription("Encode input file into base64. FILL can be 'fill' or 'nofill'. If FILL not taken, 'nofill' is used"))
         else if ( opt.setParam(true) || opt.setInitial(false) || opt.isOption("base64") || opt.isOption('B') 
                || opt.setDescription("Encode input file into base64"))
         {
@@ -335,6 +379,31 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
         }
+
+        else if ( opt.setParam("LEN", 0, 0, 100) || opt.setInitial(0) || opt.isOption("base64-len") 
+               || opt.setDescription("Set base64 encoded line max len"))
+        {
+            if (argsParser.hasHelpOption) return 0;
+
+            if (!opt.getParamValue(appConfig.base64LineLen, errMsg ))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
+        }
+
+        else if ( opt.setParam(true) || opt.setInitial(true) || opt.isOption("base64-filling") 
+               || opt.setDescription("Add base64 filling chars at end"))
+        {
+            if (argsParser.hasHelpOption) return 0;
+         
+            if (!opt.getParamValue(appConfig.base64Filling, errMsg ))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
+        }
+
         //else if (opt.setParam("NAME", "") || opt.isOption("name") || opt.isOption('N') || opt.setDescription("Set C-array/string name"))
         else if ( opt.setParam( "KeySize[,Seed[,Inc]]" /* "OPTIONS" */  /* "KeySize[,Seed[,Inc]]" */, "") || opt.isOption("xor") || opt.isOption('O') 
                || opt.setDescription("Encrypt input file with simple XOR encryption.\nKeySize = 0/1/2/4/NoEncryption/Byte/Short/Int(Unsigned)/Random(Rnd)\nSeed, Inc - start value and optional increment, Random(Rnd) for random value"))
@@ -419,28 +488,7 @@ int operator()( const std::string                               &a           //!
             }
 
         }
-        else if ( opt.setParam("LEN", 0, 0, 100) || opt.setInitial(0) || opt.isOption("base64-len") 
-               || opt.setDescription("Set base64 encoded line max len"))
-        {
-            if (argsParser.hasHelpOption) return 0;
 
-            if (!opt.getParamValue(appConfig.base64LineLen, errMsg ))
-            {
-                LOG_ERR_OPT<<errMsg<<"\n";
-                return -1;
-            }
-        }
-        else if ( opt.setParam(true) || opt.setInitial(true) || opt.isOption("base64-filling") 
-               || opt.setDescription("Add base64 filling chars at end"))
-        {
-            if (argsParser.hasHelpOption) return 0;
-
-            if (!opt.getParamValue(appConfig.base64Filling, errMsg ))
-            {
-                LOG_ERR_OPT<<errMsg<<"\n";
-                return -1;
-            }
-        }
         else if (opt.setParam("CLASSNAME","") || opt.isOption("class") || opt.setDescription("* Generate class CLASSNAME for resource"))
         {
             if (argsParser.hasHelpOption) return 0;
