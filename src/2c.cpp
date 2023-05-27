@@ -100,6 +100,7 @@ int main(int argc, char* argv[])
         argsParser.args.clear();
 
         
+        argsParser.args.push_back("-q");
         argsParser.args.push_back("--text");
         argsParser.args.push_back("--string");
         argsParser.args.push_back("--crlf");
@@ -189,6 +190,15 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+    if (!appConfig.bOverwrite && umba::filesys::isFileReadable(outputFilename))
+    {
+        LOG_ERR_OPT << umba::formatMessage("output file '$(filename)' already exist."
+                                          ).arg("filename", outputFilename).toString()
+                    << "\n"
+                    ;
+        LOG_ERR_OPT << "Use --overwrite options to force overwrite output file" << "\n";
+        return 2;
+    }
 
     std::ofstream os( outputFilename );
     if (!os)
