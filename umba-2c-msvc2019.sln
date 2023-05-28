@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "umba-2c", "_prj_msvc\umba-2
 		{4AE51426-E665-4371-A392-3A1578445012} = {4AE51426-E665-4371-A392-3A1578445012}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mk-add-mime", "_prj_msvc\mk-add-mime.vcxproj", "{828246D6-8683-44E3-B879-2C9F20219CFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +52,20 @@ Global
 		{5E409EED-4A41-4430-BC4C-39DF7AEB7566}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
 		{5E409EED-4A41-4430-BC4C-39DF7AEB7566}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|Win32
 		{5E409EED-4A41-4430-BC4C-39DF7AEB7566}.RelWithDebInfo|x86.Build.0 = RelWithDebInfo|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Debug|x64.ActiveCfg = Debug|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Debug|x64.Build.0 = Debug|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Debug|x86.ActiveCfg = Debug|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Debug|x86.Build.0 = Debug|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.MinSizeRel|x86.ActiveCfg = MinSizeRel|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Release|x64.ActiveCfg = Release|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Release|x64.Build.0 = Release|x64
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Release|x86.ActiveCfg = Release|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.Release|x86.Build.0 = Release|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|Win32
+		{828246D6-8683-44E3-B879-2C9F20219CFC}.RelWithDebInfo|x86.Build.0 = RelWithDebInfo|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

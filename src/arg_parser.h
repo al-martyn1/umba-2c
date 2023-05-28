@@ -1,14 +1,16 @@
 #pragma once
 
-#include <stack>
 
 //#include "app_config.h"
 #include "umba/cmd_line.h"
-
+#include "textUtils.h"
 
 #if defined(WIN32) || defined(_WIN32)
     #include <shellapi.h>
 #endif
+
+#include <stack>
+
 
 // AppConfig    appConfig;
 
@@ -343,6 +345,41 @@ int operator()( const std::string                               &a           //!
             if (opt.hasArg())
                appConfig.resourceFileName = opt.optArg;
             appConfig.addResourceFileName = true;
+        }
+
+        else if ( opt.setParam("EXT:MIMETYPE", "") || opt.isOption("add-mime-type")
+               || opt.setDescription("Add mime type for autodetection by file extention."))
+        {
+            if (argsParser.hasHelpOption) return 0;
+
+            if (!opt.getParamValue(strVal,errMsg))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
+
+            std::string::size_type posColon = strVal.find(':');
+            std::string::size_type posEq    = strVal.find('=');
+            std::string::size_type pos = std::min(posColon,posEq);
+
+            if (pos==std::string::npos)
+            {
+                LOG_ERR_OPT << "--add-mime-type: parameter must be in form 'EXT:MIMETYPE' or 'EXT=MIMETYPE'\n";
+                return -1;
+            }
+
+            std::string extListStr  = std::string(strVal, 0, pos);
+            std::string mimeType    = std::string(strVal, pos+1);
+
+            std::vector<std::string> extList = marty_cpp::simple_string_split(extListStr, std::string(","));
+            for(auto ext: extList)
+            {
+                ext = prepareFileExtForMimeType(ext);
+                if (ext.empty())
+                    continue;
+                appConfig.mimeTypesMap[ext] = mimeType;
+            }
+
         }
         else if ( opt.setParam("?MIMETYPE", "") || opt.isOption("mime-type") || opt.isOption("mime") || opt.isOption('M') 
                || opt.setDescription("Set mime type as taken. If no mime type explicitly taken, it will be autodetected"))

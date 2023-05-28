@@ -11,27 +11,27 @@
 
 @if not exist test_res mkdir test_res
 
-@2c       %CCMN2%  --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_c.c
-@%UMBA2C% %U2CCMN% --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_u.c
+@2c       %CCMN2%  --mime --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_c.c
+@%UMBA2C% %U2CCMN% --mime --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_u.c
 @rem --output-array
 
-@2c       %CCMN2%  --base64 --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_b64_c.c
-@%UMBA2C% %U2CCMN% --base64 --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_b64_u.c
+@2c       %CCMN2%  --mime --base64 --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_b64_c.c
+@%UMBA2C% %U2CCMN% --mime --base64 --filename --size --lf --static --output-string --line-size=142 test_data\enum_gen_cpp_templates.txt test_res\enum_gen_cpp_templates_txt_b64_u.c
 
 
 
-@2c       %CCMN2%  --no-ext --bin --array --static test_data\symbols_map.dat test_res\symbols_map_dat_c.c
-@%UMBA2C% %U2CCMN% --no-ext --bin --array --static test_data\symbols_map.dat test_res\symbols_map_dat_u.c
+@2c       %CCMN2%  --mime --no-ext --bin --array --static test_data\symbols_map.dat test_res\symbols_map_dat_c.c
+@%UMBA2C% %U2CCMN% --mime --no-ext --bin --array --static test_data\symbols_map.dat test_res\symbols_map_dat_u.c
 
-@2c       %CCMN2%  --text --string --crlf --static --compress-ws --rtrim --size --filename --header test_data\translations.json test_res\translations.json_c.h
-@%UMBA2C% %U2CCMN% --text --string --crlf --static --compress-ws --rtrim --size --filename --header test_data\translations.json test_res\translations.json_u.h
+@2c       %CCMN2%  --mime --text --string --crlf --static --compress-ws --rtrim --size --filename --header test_data\translations.json test_res\translations.json_c.h
+@%UMBA2C% %U2CCMN% --mime --text --string --crlf --static --compress-ws --rtrim --size --filename --header test_data\translations.json test_res\translations.json_u.h
 
-@2c       %CCMN2%  --filename --text --lf --xor=rnd,rnd,rnd --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_xor_c.c
-@%UMBA2C% %U2CCMN% --filename --text --lf --xor=rnd,rnd,rnd --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_xor_u.c
-@2c       %CCMN2%  --filename --text --lf                   --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_noxor__c.c
-@%UMBA2C% %U2CCMN% --filename --text --lf                   --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_noxor__u.c
+@2c       %CCMN2%  --mime --filename --text --lf --xor=rnd,rnd,rnd --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_xor_c.c
+@%UMBA2C% %U2CCMN% --mime --filename --text --lf --xor=rnd,rnd,rnd --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_xor_u.c
+@2c       %CCMN2%  --mime --filename --text --lf                   --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_noxor__c.c
+@%UMBA2C% %U2CCMN% --mime --filename --text --lf                   --static         test_data\_sources_brief.txt test_res\_sources_brief_txt_noxor__u.c
 
-@exit /B 1
+@rem exit /B 1
 
 @start %DIFF% test_res\_sources_brief_txt_xor_c.c          test_res\_sources_brief_txt_xor_u.c
 @start %DIFF% test_res\_sources_brief_txt_noxor__c.c       test_res\_sources_brief_txt_noxor__u.c

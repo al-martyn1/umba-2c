@@ -61,7 +61,7 @@ bool umbaLogGccFormat   = false; // true;
 bool umbaLogSourceInfo  = false;
 
 #include "app_ver_config.h"
-#include "mimes.h"
+//#include "mimes.h"
 #include "base64.h"
 #include "encoding/encoding.h"
 
@@ -101,6 +101,8 @@ int main(int argc, char* argv[])
 
         
         argsParser.args.push_back("-q");
+        argsParser.args.push_back("--overwrite");
+        argsParser.args.push_back("--mime");
         argsParser.args.push_back("--text");
         argsParser.args.push_back("--string");
         argsParser.args.push_back("--crlf");
@@ -269,6 +271,8 @@ int main(int argc, char* argv[])
 
     // отформатировали
 
+    auto mimeType = appConfig.getMimeTypeByFileName(inputFilename);
+
     std::string staticConst = appConfig.getStaticConst();
     auto values = umba::formatMessage("").arg("scv"           , staticConst.empty() ? std::string() : staticConst+" ")
                                          .arg("arrayType"     , appConfig.getArrayTypeName())
@@ -280,7 +284,7 @@ int main(int argc, char* argv[])
                                          .arg("orgSize"       , orgDataSize)
                                          .arg("dataSize"      , dataSize)
                                          .arg("rcFilename"    , appConfig.resourceFileName)
-                                         .arg("mimeType"      , appConfig.mimeType)
+                                         .arg("mimeType"      , mimeType)
                                          .arg("lastModified"  , appConfig.lastModified)
                                          .arg("nitzComment", appConfig.outputAsString ? " /* Not including terminating zero */" : "")
 

@@ -6,6 +6,17 @@
 
 // Используем старый код, лень переделывать
 
+std::string prepareFileExtForMimeType(std::string ext)
+{
+    while(!ext.empty() && ext.front()=='.')
+    {
+        ext.erase(ext.begin());
+    }
+
+    return marty_cpp::toLower(ext);
+}
+
+
 inline
 std::string textCompress( const std::string &text, const std::string &compressChars )
 {
