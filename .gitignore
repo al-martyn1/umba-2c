@@ -42,3 +42,6 @@ _libs/umba
 
 /_prj_msvc/*.user
 /test_res
+/2c-help.txt
+/umba-2c-help.txt
+/umba-2rcfs-help.txt

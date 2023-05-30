@@ -1,0 +1,9 @@
+--overwrite
+
+--bin-line-size=256
+--text-line-size=128
+
+--bin-files-mask=*.dat^
+--text-files-mask=*.json^,*.txt^,*.bat^
+
+--include-files=*.dat^,*.json^,*.txt^,*.bat^

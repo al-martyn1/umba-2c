@@ -77,6 +77,8 @@ struct AppConfig
 
     bool                                     outputAsString       = false  ; //!< Generate output as C-string, else - array of HEXs
     size_t                                   lineSize             = 0      ; //!< Set max line size or number of array items per line
+    size_t                                   lineSizeBin          = 0      ; //!< Set max number of array items per line for binary (2RCFS)
+    size_t                                   lineSizeText         = 0      ; //!< Set max line size for text (2RCFS)
     bool                                     staticArray          = false  ; //!< Generate static data
     bool                                     nonConstArray        = false  ; //!< Generate non-const data
     bool                                     decFormat            = false  ; //!< Use decimal format for array items (default is hex)
@@ -126,6 +128,44 @@ struct AppConfig
     std::vector<std::string>                 includeFilesMaskList;
     std::vector<std::string>                 excludeFilesMaskList;
 
+    // Если файлы не подходят ни под одну маску, будет использоваться значение значение по умолчанию из binInput
+    // Если файл подходит под обе маски, то это ошибка
+    // Надо сделать эту проверку до реальной работы, даже до создания выходного файла
+    std::vector<std::string>                 binaryFilesMaskList;
+    std::vector<std::string>                 textFilesMaskList  ;
+
+
+    size_t getLineSizeBin() const
+    {
+        return lineSizeBin ? lineSizeBin : 16;
+    }
+
+    size_t getLineSizeText() const
+    {
+        return lineSizeText ? lineSizeText : 96;
+    }
+
+    size_t getLineSize() const
+    {
+        return lineSize;
+    }
+
+    void adjust_lineSize()
+    {
+        if (lineSize)
+            return;
+
+        if (outputAsString)
+            lineSize = 100;
+        else
+            lineSize = 16;
+    }
+
+
+    bool makeXorEncrypted() const
+    {
+        return xorEncKeySize!=_2c::EKeySize::Unknown;
+    }
 
     static
     std::string textAppend(std::string text, const std::string &strAppend)
@@ -247,7 +287,7 @@ struct AppConfig
 
     void adjust_outputAsString()
     {
-        if (xorEncKeySize!=_2c::EKeySize::Unknown)
+        if (makeXorEncrypted())
         {
             outputAsString = false;
         }
@@ -276,6 +316,7 @@ struct AppConfig
         adjust_outputAsString();
         adjust_outputEnc();
         adjust_trim();
+        adjust_lineSize();
     }
 
     AppConfig adjusted(const std::string &inputFilename) const
@@ -301,7 +342,7 @@ struct AppConfig
 
     std::string xorEncrypt(std::string data) const
     {
-        if (xorEncKeySize==_2c::EKeySize::Unknown)
+        if (!makeXorEncrypted())
         {
             return data;
         }
@@ -311,7 +352,8 @@ struct AppConfig
         return data;
     }
 
-    std::string normalizeLinefeeds(const std::string &text) const
+    static
+    std::string normalizeLinefeeds(const std::string &text, bool binInput, marty_cpp::ELinefeedType outputLineFeed)
     {
         if (binInput)
         {
@@ -334,9 +376,35 @@ struct AppConfig
         }
     }
 
+    std::string normalizeLinefeeds(const std::string &text) const
+    {
+        return normalizeLinefeeds(text, binInput, outputLineFeed);
+        #if 0
+        if (binInput)
+        {
+            return text;
+        }
+
+        switch(outputLineFeed)
+        {
+            case marty_cpp::ELinefeedType::lf  :
+            case marty_cpp::ELinefeedType::cr  :
+            case marty_cpp::ELinefeedType::lfcr:
+            case marty_cpp::ELinefeedType::crlf:
+            {
+                std::string textLfNormalized   = marty_cpp::normalizeCrLfToLf(text);
+                std::vector<std::string> lines = marty_cpp::splitToLinesSimple(textLfNormalized, true /* addEmptyLineAfterLastLf */, '\n' /* lfChar */ );
+                return mergeLines(lines, outputLineFeed, false /* addTrailingNewLine */);
+            }
+
+            default: return text;
+        }
+        #endif
+    }
+
     std::string getArrayTypeName() const
     {
-        return outputAsString ? "char" : "unsigned char";
+        return outputAsString && !makeXorEncrypted() ? "char" : "unsigned char";
     }
     
     std::string getStaticConst() const

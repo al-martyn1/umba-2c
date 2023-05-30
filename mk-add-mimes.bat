@@ -1,4 +1,4 @@
-@set MK_ADD_MIMES=.out\msvc2019\x64\Debug\mk-add-mime.exe
+@call set_2c_names.bat
 @if not exist _distr_conf mkdir _distr_conf
 @if not exist _distr_conf\conf mkdir _distr_conf\conf
 @if not exist %MK_ADD_MIMES% goto FAIL
@@ -9,4 +9,5 @@
 @exit /B 1
 
 :DONE
+@call copy_distr_conf_to_msvc2019_out.bat
 @exit /B 0

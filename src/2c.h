@@ -29,9 +29,9 @@ std::string textAppend(std::string text, const std::string &strAppend)
 
 //----------------------------------------------------------------------------
 inline
-std::string convertTextEncoding(const std::string &text, const AppConfig &appCfg)
+std::string convertTextEncoding(const std::string &text, const AppConfig &appCfg, bool binInput)
 {
-    if (appCfg.binInput)
+    if (binInput)
     {
         return text;
     }
@@ -72,9 +72,40 @@ std::string convertTextEncoding(const std::string &text, const AppConfig &appCfg
 
 //----------------------------------------------------------------------------
 inline
-std::string compressTrimText(std::string text, const AppConfig &appCfg)
+std::string convertTextEncoding(const std::string &text, const AppConfig &appCfg)
 {
-    if (appCfg.binInput)
+    return convertTextEncoding(text, appCfg, appCfg.binInput);
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string readFile(const std::string &inputFilename, const AppConfig &appCfg, bool binInput)
+{
+    std::vector<char> fileDataVec;
+    if (!umba::filesys::readFile(inputFilename, fileDataVec))
+    {
+        // LOG_ERR_OPT << umba::formatMessage("Failed to open input file '$(filename)'").arg("filename",inputFilename).toString() << "\n";
+        // return 2;
+        throw std::runtime_error( umba::formatMessage("Failed to open input file '$(filename)'").arg("filename", inputFilename).toString());
+    }
+    std::string
+    dataReaded = std::string(fileDataVec.data(), fileDataVec.size());
+    dataReaded = convertTextEncoding(dataReaded, appCfg, binInput);
+    return dataReaded;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string readFile(const std::string &inputFilename, const AppConfig &appCfg)
+{
+    return readFile(inputFilename, appCfg, appCfg.binInput);
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string compressTrimText(std::string text, const AppConfig &appCfg, bool binInput)
+{
+    if (binInput)
     {
         return text;
     }
@@ -94,19 +125,9 @@ std::string compressTrimText(std::string text, const AppConfig &appCfg)
 
 //----------------------------------------------------------------------------
 inline
-std::string readFile(const std::string &inputFilename, const AppConfig &appCfg)
+std::string compressTrimText(std::string text, const AppConfig &appCfg)
 {
-    std::vector<char> fileDataVec;
-    if (!umba::filesys::readFile(inputFilename, fileDataVec))
-    {
-        // LOG_ERR_OPT << umba::formatMessage("Failed to open input file '$(filename)'").arg("filename",inputFilename).toString() << "\n";
-        // return 2;
-        throw std::runtime_error( umba::formatMessage("Failed to open input file '$(filename)'").arg("filename", inputFilename).toString());
-    }
-    std::string
-    dataReaded = std::string(fileDataVec.data(), fileDataVec.size());
-    dataReaded = convertTextEncoding(dataReaded, appCfg);
-    return dataReaded;
+    return compressTrimText(text, appCfg, appCfg.binInput);
 }
 
 //----------------------------------------------------------------------------

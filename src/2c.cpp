@@ -2,6 +2,8 @@
     \brief Утилита umba-2c - конвертер файлов в С-массивы
  */
 
+#define UMBA_2C
+
 // Должна быть первой
 #include "umba/umba.h"
 //---
@@ -215,7 +217,7 @@ int main(int argc, char* argv[])
 
     
     std::string data;
-    bool detectOutputSep = false;
+    //bool detectOutputSep = false;
 
     if (appConfig.binInput)
     {
@@ -240,14 +242,14 @@ int main(int argc, char* argv[])
 
     // есть только данные, лежат в data
 
-    if (appConfig.lineSize==0)
-    {
-        if (appConfig.outputAsString)
-            appConfig.lineSize = 100;
-        else
-            appConfig.lineSize = 16;
-    }
-
+    // if (appConfig.lineSize==0)
+    // {
+    //     if (appConfig.outputAsString)
+    //         appConfig.lineSize = 100;
+    //     else
+    //         appConfig.lineSize = 16;
+    // }
+    //  
 
     std::vector< std::string > formattedLines;
     std::string indent = "    ";
