@@ -63,6 +63,111 @@
 
 
 //----------------------------------------------------------------------------
+struct XorEncryptionConfig
+{
+    _2c::EKeySize                            xorEncKeySize        = _2c::EKeySize::Unknown; //!<
+    unsigned                                 xorEncSeed           = 0                     ; //!< 
+    unsigned                                 xorEncInc            = 0                     ; //!< 
+
+    void clear()
+    {
+        xorEncKeySize        = _2c::EKeySize::Unknown; //!<
+        xorEncSeed           = 0                     ; //!< 
+        xorEncInc            = 0                     ; //!< 
+    }
+
+
+    bool needXorEncrypt() const
+    {
+        return xorEncKeySize!=_2c::EKeySize::Unknown;
+    }
+
+    std::string xorEncrypt(std::string data) const
+    {
+        if (!needXorEncrypt())
+        {
+            return data;
+        }
+
+        _2c::xorEncrypt(data.begin(), data.end(), xorEncKeySize, xorEncSeed, xorEncInc);
+
+        return data;
+    }
+
+    bool parseCommandLineOptionValue(const std::string &xorOptionsStr, std::string &errMsg)
+    {
+        std::vector<std::string> xorOptionsVec;
+        // splitToVector( xorOptionsStr, xorOptionsVec, ',' );
+        xorOptionsVec = marty_cpp::splitToLinesSimple(xorOptionsStr, false /* addEmptyLineAfterLastLf */, ',');
+
+        if (xorOptionsVec.size()<1)
+        {
+            errMsg = "XOR encryption option - invalid option format";
+            return false;
+        }
+
+        std::mt19937 rng = _2c::xorEncryptionGetRandomGenerator();
+
+        _2c::EKeySize ksz = _2c::xorEncryptionKeySizeFromString(xorOptionsVec[0], rng);
+        if (ksz==_2c::EKeySize::Unknown)
+        {
+            errMsg = "XOR encryption option - invalid KeySize value";
+            return false;
+        }
+
+        //  
+        // while(xorOptionsVec.size()<3)
+        // {
+        //     xorOptionsVec.emplace_back("Random");
+        // }
+
+        std::size_t keySize = _2c::xorEncryptionKeySize(ksz);
+        if (keySize==0)
+        {
+            clear();
+            return true;
+        }
+        else
+        {
+            if (xorOptionsVec.size()<2)
+            {
+                errMsg = "XOR encryption option - invalid option format";
+                return false;
+            }
+
+            if (xorOptionsVec.size()<3)
+                xorOptionsVec.push_back("0");
+
+            bool bValid = false;
+            xorEncSeed = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[1], rng, &bValid);
+            if (!bValid)
+            {
+                errMsg = "XOR encryption option - invalid seed value";
+                return false;
+            }
+
+            bValid = false;
+            xorEncInc = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[2], rng, &bValid);
+            if (!bValid)
+            {
+                errMsg = "XOR encryption option - invalid key increment value";
+                return false;
+            }
+
+            xorEncKeySize = ksz;
+
+            // outputAsString = false;
+
+            return true;    
+        }
+    
+    }
+
+
+};
+
+
+
 struct AppConfig
 {
     // umba-2c & umba-2rcfs commons
@@ -113,11 +218,8 @@ struct AppConfig
     int                                      base64LineLen        = 0      ; //!< Set base64 encoded line max len
     bool                                     base64Filling        = false  ; //!< Add base64 filling chars at end
 
-    _2c::EKeySize                            xorEncKeySize        = _2c::EKeySize::Unknown; //!< Encrypt input file with simple XOR encryption.
-    unsigned                                 xorEncSeed           = 0                     ; //!< 
-    unsigned                                 xorEncInc            = 0                     ; //!< 
-
-
+    XorEncryptionConfig                      dataXorEncryptionConfig       ; //!< Data Xor encryption options
+    XorEncryptionConfig                      filenameXorEncryptionConfig   ; //!< Filename Xor encryption options - for 2RCFS
 
 
 
@@ -161,10 +263,24 @@ struct AppConfig
             lineSize = 16;
     }
 
-
-    bool makeXorEncrypted() const
+    bool needXorEncryptData() const
     {
-        return xorEncKeySize!=_2c::EKeySize::Unknown;
+        return dataXorEncryptionConfig.needXorEncrypt();
+    }
+
+    std::string xorEncryptData(std::string data) const
+    {
+        return dataXorEncryptionConfig.xorEncrypt(data);
+    }
+
+    bool needXorEncryptFilename() const
+    {
+        return filenameXorEncryptionConfig.needXorEncrypt();
+    }
+
+    std::string xorEncryptFilename(std::string data) const
+    {
+        return filenameXorEncryptionConfig.xorEncrypt(data);
     }
 
     static
@@ -287,7 +403,7 @@ struct AppConfig
 
     void adjust_outputAsString()
     {
-        if (makeXorEncrypted())
+        if (needXorEncryptData())
         {
             outputAsString = false;
         }
@@ -338,18 +454,6 @@ struct AppConfig
         outputFilename = umba::filename::appendExtention( outputFilename, std::string("c") );
 
         return outputFilename;
-    }
-
-    std::string xorEncrypt(std::string data) const
-    {
-        if (!makeXorEncrypted())
-        {
-            return data;
-        }
-
-        _2c::xorEncrypt(data.begin(), data.end(), xorEncKeySize, xorEncSeed, xorEncInc);
-
-        return data;
     }
 
     static
@@ -404,7 +508,7 @@ struct AppConfig
 
     std::string getArrayTypeName() const
     {
-        return outputAsString && !makeXorEncrypted() ? "char" : "unsigned char";
+        return outputAsString && !needXorEncryptData() ? "char" : "unsigned char";
     }
     
     std::string getStaticConst() const

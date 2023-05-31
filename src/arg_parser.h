@@ -503,7 +503,7 @@ int operator()( const std::string                               &a           //!
 
         #endif
 
-        //else if (opt.setParam("NAME", "") || opt.isOption("name") || opt.isOption('N') || opt.setDescription("Set C-array/string name"))
+        // filenameXorEncryptionConfig
         else if ( opt.setParam( "KeySize[,Seed[,Inc]]" /* "OPTIONS" */  /* "KeySize[,Seed[,Inc]]" */, "") || opt.isOption("xor") || opt.isOption('O') 
                || opt.setDescription("Encrypt input file with simple XOR encryption.\nKeySize = 0/1/2/4/NoEncryption/Byte/Short/Int(Unsigned)/Random(Rnd)\nSeed, Inc - start value and optional increment, Random(Rnd) for random value"))
         {
@@ -517,72 +517,40 @@ int operator()( const std::string                               &a           //!
                 return -1;
             }
 
-            xorOptionsStr = opt.optArg;
-
-            std::vector<std::string> xorOptionsVec;
-            // splitToVector( xorOptionsStr, xorOptionsVec, ',' );
-            xorOptionsVec = marty_cpp::splitToLinesSimple(xorOptionsStr, false /* addEmptyLineAfterLastLf */, ',');
-
-            if (xorOptionsVec.size()<1)
+            if (!appConfig.dataXorEncryptionConfig.parseCommandLineOptionValue(opt.optArg, errMsg))
             {
-                LOG_ERR_OPT<<"XOR encryption option - invalid option format (--xor=KeySize[,Seed[,Inc]])"<<"\n";
+                LOG_ERR_OPT << errMsg << " (--xor)"<<"\n";
                 return -1;
-            }
-
-            // _2c::EKeySize ks = _2c::enum_deserialize(xorOptionsVec[0], _2c::EKeySize::Unknown);
-            std::mt19937 rng = _2c::xorEncryptionGetRandomGenerator();
-
-            _2c::EKeySize ksz = _2c::xorEncryptionKeySizeFromString(xorOptionsVec[0], rng);
-            if (ksz==_2c::EKeySize::Unknown)
-            {
-                LOG_ERR_OPT<<"XOR encryption option - invalid KeySize value (--xor=KeySize[,Seed[,Inc]])"<<"\n";
-                return -1;
-            }
-
-            std::size_t keySize = _2c::xorEncryptionKeySize(ksz);
-            if (keySize==0)
-            {
-                // No XOR encryption, reset 
-                appConfig.xorEncKeySize  = _2c::EKeySize::NoEncryption;
-                appConfig.xorEncSeed     = 0;
-                appConfig.xorEncInc      = 0;
-                //appConfig.outputAsString = true; //
-            }
-            else
-            {
-                if (xorOptionsVec.size()<2)
-                {
-                    LOG_ERR_OPT<<"XOR encryption option - invalid option format (--xor=KeySize[,Seed[,Inc]])"<<"\n";
-                    return -1;
-                }
-
-                if (xorOptionsVec.size()<3)
-                    xorOptionsVec.push_back("0");
-
-                bool bValid = false;
-                appConfig.xorEncSeed = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[1], rng, &bValid);
-                if (!bValid)
-                {
-                    LOG_ERR_OPT<<"XOR encryption option - invalid seed value (--xor=KeySize[,Seed[,Inc]])"<<"\n";
-                    return -1;
-                }
-
-                bValid = false;
-                appConfig.xorEncInc = _2c::xorEncryptionSeedFromString(ksz, xorOptionsVec[2], rng, &bValid);
-                if (!bValid)
-                {
-                    LOG_ERR_OPT<<"XOR encryption option - invalid key increment value (--xor=KeySize[,Seed[,Inc]])"<<"\n";
-                    return -1;
-                }
-
-                appConfig.xorEncKeySize = ksz;
-
-                appConfig.outputAsString = false;
             }
 
             return 0;
 
         }
+
+        #if defined(UMBA_2RCFS)
+        else if ( opt.setParam( "KeySize[,Seed[,Inc]]" /* "OPTIONS" */  /* "KeySize[,Seed[,Inc]]" */, "") || opt.isOption("filename-xor") || opt.isOption('o') 
+               || opt.setDescription("Encrypt resource filename with simple XOR encryption.\nKeySize = 0/1/2/4/NoEncryption/Byte/Short/Int(Unsigned)/Random(Rnd)\nSeed, Inc - start value and optional increment, Random(Rnd) for random value"))
+        {
+            if (argsParser.hasHelpOption) return 0;
+
+            std::string xorOptionsStr;
+
+            if (!opt.hasArg() || opt.optArg.empty())
+            {
+                LOG_ERR_OPT<<"Missing '--filename-xor' option argument"<<"\n";
+                return -1;
+            }
+
+            if (!appConfig.filenameXorEncryptionConfig.parseCommandLineOptionValue(opt.optArg, errMsg))
+            {
+                LOG_ERR_OPT << errMsg << " (--filename-xor)"<<"\n";
+                return -1;
+            }
+
+            return 0;
+
+        }
+        #endif
 
         #if !defined(UMBA_2RCFS)
         else if (opt.setParam("CLASSNAME","") || opt.isOption("class") || opt.setDescription("* Generate class CLASSNAME for resource"))
