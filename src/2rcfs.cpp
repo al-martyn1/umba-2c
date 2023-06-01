@@ -183,8 +183,9 @@ int main(int argc, char* argv[])
 
     unsigned errCount = 0;
 
-    std::vector< std::basic_regex<char> > binFilesMaskListRegexes  = umba::scanners::fromSimpleMaskToRegexVector(appConfig.binaryFilesMaskList, true /* useAnchoring */, true /* allowRawRegexes */);
-    std::vector< std::basic_regex<char> > textFilesMaskListRegexes = umba::scanners::fromSimpleMaskToRegexVector(appConfig.textFilesMaskList  , true /* useAnchoring */, true /* allowRawRegexes */);
+    std::vector< std::basic_regex<char> > binFilesMaskListRegexes       = umba::scanners::fromSimpleMaskToRegexVector(appConfig.binaryFilesMaskList    , true /* useAnchoring */, true /* allowRawRegexes */);
+    std::vector< std::basic_regex<char> > textFilesMaskListRegexes      = umba::scanners::fromSimpleMaskToRegexVector(appConfig.textFilesMaskList      , true /* useAnchoring */, true /* allowRawRegexes */);
+    std::vector< std::basic_regex<char> > removeLinefeedMaskListRegexes = umba::scanners::fromSimpleMaskToRegexVector(appConfig.removeLinefeedMaskList , true /* useAnchoring */, true /* allowRawRegexes */);
 
     for(auto foundFile : foundFiles)
     {
@@ -271,18 +272,18 @@ int main(int argc, char* argv[])
 
         bool binInput = appConfig.binInput;
 
-        std::string binInputMatch ="by default";
+        std::string binInputMatch = binInput ? "default bin" : "default text";
 
         if (binMatched)
         {
             binInput = true;
-            binInputMatch = "bin";
+            binInputMatch = "bin match";
         }
 
         if (textMatched)
         {
             binInput = false;
-            binInputMatch = "text";
+            binInputMatch = "text match";
         }
 
 
@@ -326,8 +327,15 @@ int main(int argc, char* argv[])
         }
         else // text input
         {
+            marty_cpp::ELinefeedType outputLineFeed = appConfig.outputLineFeed;
+            bool removeLinefeeds = umba::regex_helpers::regexMatch(normalizedFileName, removeLinefeedMaskListRegexes, 0 );
+            if (removeLinefeeds)
+            {
+                outputLineFeed = marty_cpp::ELinefeedType::linefeedRemove;
+            }
+
             dataReaded = compressTrimText(dataReaded, appConfig, false /* binInput */);
-            data       = appConfig.normalizeLinefeeds(dataReaded, false /* binInput */, appConfig.outputLineFeed);
+            data       = appConfig.normalizeLinefeeds(dataReaded, false /* binInput */, outputLineFeed);
         }
 
         if (outputAsString)
@@ -360,7 +368,7 @@ int main(int argc, char* argv[])
 
         std::string staticConst = appConfig.getStaticConst();
         auto values = umba::formatMessage("").arg("scv"             , staticConst.empty() ? std::string() : staticConst+" ")
-                                             .arg("arrayType"       , appConfig.getArrayTypeName())
+                                             .arg("arrayType"       , appConfig.getArrayTypeName(outputAsString))
                                              .arg("arraySize"       , arraySize)
                                              .arg("cname"           , cname)
                                              .arg("xorSize"         , (unsigned)appConfig.dataXorEncryptionConfig.xorEncKeySize)
@@ -370,6 +378,8 @@ int main(int argc, char* argv[])
                                              .arg("filenameXorSeed" , (unsigned)appConfig.filenameXorEncryptionConfig.xorEncSeed)
                                              .arg("filenameXorInc"  , (unsigned)appConfig.filenameXorEncryptionConfig.xorEncInc)
                                              .arg("dataSize"        , dataSize)
+                                             .arg("rcFilenameType"  , appConfig.getArrayTypeName(!appConfig.needXorEncryptFilename()))
+                                             .arg("rcFilenamePtr"   , appConfig.getArrayTypeName(appConfig.needXorEncryptFilename()?"":"*"))
                                              .arg("rcFilename"      , normalizedRelName)
                                              .arg("rcFilenameSize"  , normalizedRelName.size())
                                              .arg("nitzComment"     , appConfig.outputAsString ? " /* Not including terminating zero */" : "")
@@ -390,7 +400,7 @@ int main(int argc, char* argv[])
 
         if (appConfig.needXorEncryptFilename())
         {
-            os << umba::formatMessage("\n$(scv)char* $(cname)_filename[$(rcFilenameSize)] = " ).values(values).toString();
+            os << umba::formatMessage("\n$(scv)$(rcFilenameType) $(cname)_filename[$(rcFilenameSize)] = " ).values(values).toString();
             auto xoredNormalizedRelName = appConfig.xorEncryptFilename(normalizedRelName);
             auto appConfigCopy = appConfig;
             appConfigCopy.lineSize = 4; // 096;
@@ -416,9 +426,12 @@ int main(int argc, char* argv[])
             os << umba::formatMessage("\n$(scv)char* $(cname)_filename = \"$(rcFilename)\";\n" ).values(values).toString();
         }
 
+                                             // .arg("rcFilenameType"  , appConfig.getArrayTypeName(!appConfig.needXorEncryptFilename()))
+                                             // .arg("rcFilenamePtr"   , appConfig.getArrayTypeName(appConfig.needXorEncryptFilename()?"":"*"))
+                                              
         os << umba::formatMessage("\n$(scv)unsigned $(cname)_size  = $(dataSize);$(nitzComment)\n" ).values(values).toString();
         os << umba::formatMessage("\n$(scv)$(arrayType) $(cname)[$(arraySize)] =").values(values).toString();
-    
+
 
         bool bFirst = true;
     
@@ -456,8 +469,8 @@ int main(int argc, char* argv[])
                                         );
 
         os << ( appConfig.needXorEncryptData()
-              ? umba::formatMessage("CUSTOM_UMBA_RCFS_REGISTER_RESOURSE_XORED($(rcFilename), &$(cname)[0], $(cname)_size, $(xorSize), $(xorSeed), $(xorInc))").values(values).arg("rcFilename",fileNameFormatted).toString()
-              : umba::formatMessage("CUSTOM_UMBA_RCFS_REGISTER_RESOURSE($(rcFilename), &$(cname)[0], $(cname)_size)").values(values).arg("rcFilename",fileNameFormatted).toString()
+              ? umba::formatMessage("CUSTOM_UMBA_RCFS_REGISTER_RESOURSE_XORED($(rcFilename), &$(cname)[0], $(cname)_size, $(xorSize), $(xorSeed), $(xorInc));").values(values).arg("rcFilename",fileNameFormatted).toString()
+              : umba::formatMessage("CUSTOM_UMBA_RCFS_REGISTER_RESOURSE($(rcFilename), &$(cname)[0], $(cname)_size);").values(values).arg("rcFilename",fileNameFormatted).toString()
               ) << "\n";
 
         os<<"\n"<<"/*--------------------------------------------------------*/"<<"\n\n";

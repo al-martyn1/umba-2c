@@ -352,7 +352,7 @@ int operator()( const std::string                               &a           //!
             // detect
             
             marty_cpp::ELinefeedType tmp = marty_cpp::enum_deserialize( strVal, marty_cpp::ELinefeedType::invalid );
-            if (tmp==marty_cpp::ELinefeedType::invalid)
+            if (tmp==marty_cpp::ELinefeedType::invalid || tmp==marty_cpp::ELinefeedType::linefeedRemove)
             {
                 LOG_ERR_OPT<<"Invalid linefeed option value: "<<strVal<<"\n";
                 return -1;
@@ -584,11 +584,11 @@ int operator()( const std::string                               &a           //!
         }
         #endif
 
-        else if (opt.isOption("static") || opt.isOption('S') || opt.setDescription("Generate static data"))
+        else if (opt.isOption("non-static") || opt.isOption('S') || opt.setDescription("Generate static data"))
         {
             if (argsParser.hasHelpOption) return 0;
 
-            appConfig.staticArray = true;
+            appConfig.staticArray = false;
 
             return 0;
         }
@@ -742,6 +742,24 @@ int operator()( const std::string                               &a           //!
         //#endif
 
         #if defined(UMBA_2RCFS)
+        else if ( opt.setParam("MASK,...") || opt.isOption("remove-linefeed-files-mask")
+               || opt.setDescription("Filename mask to remove linefeeds")
+                )
+        {
+            if (argsParser.hasHelpOption) return 0;
+            
+            if (!opt.hasArg())
+            {
+                LOG_ERR_OPT<<"remove linefeeds files mask not taken (--remove-linefeed-files-mask)\n";
+                return -1;
+            }
+
+            std::vector< std::string > lst = umba::string_plus::split(opt.optArg, ',');
+            appConfig.removeLinefeedMaskList.insert(appConfig.removeLinefeedMaskList.end(), lst.begin(), lst.end());
+
+            return 0;
+        }
+
         else if ( opt.setParam("MASK,...") || opt.isOption("bin-files-mask")
                || opt.setDescription("Filename mask to detect binary files")
                 )

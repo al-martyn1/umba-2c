@@ -184,7 +184,7 @@ struct AppConfig
     size_t                                   lineSize             = 0      ; //!< Set max line size or number of array items per line
     size_t                                   lineSizeBin          = 0      ; //!< Set max number of array items per line for binary (2RCFS)
     size_t                                   lineSizeText         = 0      ; //!< Set max line size for text (2RCFS)
-    bool                                     staticArray          = false  ; //!< Generate static data
+    bool                                     staticArray          = true   ; //!< Generate static data
     bool                                     nonConstArray        = false  ; //!< Generate non-const data
     bool                                     decFormat            = false  ; //!< Use decimal format for array items (default is hex)
     bool                                     compressWhitespaces  = false  ; //!< Compress whitespaces - reduce multiple WS (\\s, \\t) to single
@@ -236,6 +236,7 @@ struct AppConfig
     std::vector<std::string>                 binaryFilesMaskList;
     std::vector<std::string>                 textFilesMaskList  ;
 
+    std::vector<std::string>                 removeLinefeedMaskList;
 
     size_t getLineSizeBin() const
     {
@@ -470,6 +471,7 @@ struct AppConfig
             case marty_cpp::ELinefeedType::cr  :
             case marty_cpp::ELinefeedType::lfcr:
             case marty_cpp::ELinefeedType::crlf:
+            case marty_cpp::ELinefeedType::linefeedRemove:
             {
                 std::string textLfNormalized   = marty_cpp::normalizeCrLfToLf(text);
                 std::vector<std::string> lines = marty_cpp::splitToLinesSimple(textLfNormalized, true /* addEmptyLineAfterLastLf */, '\n' /* lfChar */ );
@@ -510,7 +512,12 @@ struct AppConfig
     {
         return outputAsString && !needXorEncryptData() ? "char" : "unsigned char";
     }
-    
+
+    std::string getArrayTypeName(bool oas) const
+    {
+        return oas && !needXorEncryptData() ? "char" : "unsigned char";
+    }
+
     std::string getStaticConst() const
     {
         std::string staticConst;

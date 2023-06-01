@@ -80,22 +80,22 @@ std::string makeCppName( const std::string &str )
            }
         else if ( ch=='+' )
            {
-            res.append("PLUS");
+            res.append("_PLUS_");
             continue;
            }
         else if ( ch=='~' )
            {
-            res.append("n");
+            res.append("_n_");
             continue;
            }
         else if ( ch=='-' )
            {
-            res.append("MINUS");
+            res.append("_MINUS_");
             continue;
            }
         else if ( ch=='*' )
            {
-            res.append("MUL");
+            res.append("_MUL_");
             continue;
            }
         else
