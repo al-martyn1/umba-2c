@@ -38,7 +38,7 @@
 //----------------------------------------------------------------------------
 #if defined(DEBUG) || defined(_DEBUG)
 
-    // При отладке удобнее разглядывать std::map
+    // РџСЂРё РѕС‚Р»Р°РґРєРµ СѓРґРѕР±РЅРµРµ СЂР°Р·РіР»СЏРґС‹РІР°С‚СЊ std::map
 
     template<typename StringType>
     using StringStringMap = std::map<StringType,StringType>;
@@ -48,7 +48,7 @@
 
 #else
 
-    // В релизе std::unordered_map быстрее
+    // Р’ СЂРµР»РёР·Рµ std::unordered_map Р±С‹СЃС‚СЂРµРµ
     template<typename StringType>
     using StringStringMap = std::unordered_map<StringType,StringType>;
 
@@ -223,16 +223,16 @@ struct AppConfig
 
 
 
-    // Только для umba-2rcfs
+    // РўРѕР»СЊРєРѕ РґР»СЏ umba-2rcfs
     bool                                     allFiles = false;
-    // bool                                     scanMode = false; // хз откуда взялось
+    // bool                                     scanMode = false; // С…Р· РѕС‚РєСѓРґР° РІР·СЏР»РѕСЃСЊ
     std::vector<std::string>                 scanPaths;
     std::vector<std::string>                 includeFilesMaskList;
     std::vector<std::string>                 excludeFilesMaskList;
 
-    // Если файлы не подходят ни под одну маску, будет использоваться значение значение по умолчанию из binInput
-    // Если файл подходит под обе маски, то это ошибка
-    // Надо сделать эту проверку до реальной работы, даже до создания выходного файла
+    // Р•СЃР»Рё С„Р°Р№Р»С‹ РЅРµ РїРѕРґС…РѕРґСЏС‚ РЅРё РїРѕРґ РѕРґРЅСѓ РјР°СЃРєСѓ, Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ Р·РЅР°С‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РёР· binInput
+    // Р•СЃР»Рё С„Р°Р№Р» РїРѕРґС…РѕРґРёС‚ РїРѕРґ РѕР±Рµ РјР°СЃРєРё, С‚Рѕ СЌС‚Рѕ РѕС€РёР±РєР°
+    // РќР°РґРѕ СЃРґРµР»Р°С‚СЊ СЌС‚Сѓ РїСЂРѕРІРµСЂРєСѓ РґРѕ СЂРµР°Р»СЊРЅРѕР№ СЂР°Р±РѕС‚С‹, РґР°Р¶Рµ РґРѕ СЃРѕР·РґР°РЅРёСЏ РІС‹С…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р°
     std::vector<std::string>                 binaryFilesMaskList;
     std::vector<std::string>                 textFilesMaskList  ;
 
@@ -335,7 +335,7 @@ struct AppConfig
         {
             if (mimeType.empty())
             {
-                //NOTE: !!! А оно надо, toLower?
+                //NOTE: !!! Рђ РѕРЅРѕ РЅР°РґРѕ, toLower?
                 //std::string srcExt = toLower(umba::filename::getFileExtention(inputFilename));
                 // std::string srcExt = umba::filename::getFileExtention(inputFilename);
                 // std::string srcExt = marty_cpp::toLower(umba::filename::getFileExtention(inputFilename));
