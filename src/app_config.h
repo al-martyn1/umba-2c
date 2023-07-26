@@ -320,6 +320,15 @@ struct AppConfig
     }
 
 
+    bool isOutputEncodingUtf8() const
+    {
+        auto tmpEnc = marty_cpp::toLower(outputEnc);
+        if (tmpEnc=="utf-8" || tmpEnc=="utf8")
+            return true;
+        return false;
+    }
+
+
     void adjust_mimeType(const std::string &inputFilename)
     {
         if (addMimeType)

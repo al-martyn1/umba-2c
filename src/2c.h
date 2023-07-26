@@ -7,6 +7,7 @@
 #include "marty_cpp/marty_cpp.h"
 #include "marty_cpp/src_normalization.h"
 #include "textUtils.h"
+#include "marty_utf/utf.h"
 
 #include <string>
 #include <exception>
@@ -191,6 +192,8 @@ std::vector<std::string> formatToLinesAsEscapedStrings(const std::string &text, 
 {
     // std::string chStr = marty_cpp::cEscapeString( std::string(1,ch) );
 
+    bool utfMode = appCfg.isOutputEncodingUtf8();
+
     std::vector<std::string> lines;
     //size_t                   numOfLineItems = 0;
     std::string              curLine;
@@ -213,14 +216,16 @@ std::vector<std::string> formatToLinesAsEscapedStrings(const std::string &text, 
     // LF CR как перевод строки - маловероятная ситуация
     auto appendCharStr = [&](const std::string &chStr, char prevCh, char ch)
     {
-        if (curLine.size() && curLine.size()>=appCfg.lineSize && prevCh!='\r')
+        std::size_t curLineSize = utfMode ? marty_utf::getStringLenUtf8(curLine) : curLine.size();
+
+        if (curLineSize && curLineSize>=appCfg.lineSize && prevCh!='\r')
         {
             // if ((curLine.back()!='\r' /*  && curLine.back()!='\n' */ )  /* || bForce */ )
             {
                 appendLine();
             }
         }
-        else if (curLine.size() && prevCh=='\r' && ch!='\n')
+        else if (curLineSize && prevCh=='\r' && ch!='\n')
         {
             appendLine();
         }
@@ -250,30 +255,8 @@ std::vector<std::string> formatToLinesAsEscapedStrings(const std::string &text, 
 
         appendCharStr(chStr, prevCh, ch);
 
-        prevCh = ch;
+        //prevCh = ch;
 
-        // switch(st)
-        // {
-        //     case stNormal:
-        //     {
-        //         if (ch=='\r')
-        //         {
-        //             st = stWaitLf;
-        //             appendCharStr(chStr)
-        //         }
-        //         else if (ch=='\n')
-        //     }
-        //  
-        //     case stWaitCr:
-        //     {
-        //     }
-        //  
-        //     case stWaitLf:
-        //     {
-        //     }
-        //  
-        //     default: throw std::runtime_error("Something goes wrong");
-        // }
 
     }
 
