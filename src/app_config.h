@@ -406,7 +406,7 @@ struct AppConfig
         {
             // if (appConfig.cname[0]>='0' && appConfig.cname[0]<='9')
             //     appConfig.cname = std::string("_") + appConfig.cname;
-            cname = marty_cpp::fixName(cname, true /* fixStartDigit */  /* , forceAllowedChars */ );
+            cname = marty_cpp::fixName(cname, true /* fixStartDigit */, true /*forceAllowedChars */ );
         }
     
     }
