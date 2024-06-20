@@ -3,16 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "_prj_msvc\zlib.vcxproj", "{4AE51426-E665-4371-A392-3A1578445012}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", ".msvc2019\zlib.vcxproj", "{4AE51426-E665-4371-A392-3A1578445012}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "umba-2c", "_prj_msvc\umba-2c.vcxproj", "{5E409EED-4A41-4430-BC4C-39DF7AEB7566}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "umba-2c", ".msvc2019\umba-2c.vcxproj", "{5E409EED-4A41-4430-BC4C-39DF7AEB7566}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4AE51426-E665-4371-A392-3A1578445012} = {4AE51426-E665-4371-A392-3A1578445012}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mk-add-mime", "_prj_msvc\mk-add-mime.vcxproj", "{828246D6-8683-44E3-B879-2C9F20219CFC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mk-add-mime", ".msvc2019\mk-add-mime.vcxproj", "{828246D6-8683-44E3-B879-2C9F20219CFC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "umba-2rcfs", "_prj_msvc\umba-2rcfs.vcxproj", "{57BE0ACB-993A-4B0B-8714-EE5714B6EA4F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "umba-2rcfs", ".msvc2019\umba-2rcfs.vcxproj", "{57BE0ACB-993A-4B0B-8714-EE5714B6EA4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

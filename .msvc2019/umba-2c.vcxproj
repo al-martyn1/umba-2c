@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4AE51426-E665-4371-A392-3A1578445012}</ProjectGuid>
+    <ProjectGuid>{5E409EED-4A41-4430-BC4C-39DF7AEB7566}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project=".\props\umba_project_configurations.props" />
-  <Import Project=".\props\umba_msvcver.props" />
-  <Import Project=".\props\umba_target_lib_static.props" />
-  <Import Project=".\props\umba_config_matrix_common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_project_configurations.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_msvcver.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_target_console.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_config_matrix_common.props" />
   <!--Import Project=".\umba_config_matrix_qt.props" /-->
   <Import Project=".\umba_prjdirs.props" />
   <Import Project=".\umba_prjdefs.props" />
@@ -31,19 +31,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\_libs\zlib\adler32.c" />
-    <ClCompile Include="..\_libs\zlib\compress.c" />
-    <ClCompile Include="..\_libs\zlib\crc32.c" />
-    <ClCompile Include="..\_libs\zlib\deflate.c" />
-    <ClCompile Include="..\_libs\zlib\gzio.c" />
-    <ClCompile Include="..\_libs\zlib\infback.c" />
-    <ClCompile Include="..\_libs\zlib\inffast.c" />
-    <ClCompile Include="..\_libs\zlib\inflate.c" />
-    <ClCompile Include="..\_libs\zlib\inftrees.c" />
-    <ClCompile Include="..\_libs\zlib\trees.c" />
-    <ClCompile Include="..\_libs\zlib\uncompr.c" />
-    <ClCompile Include="..\_libs\zlib\zutil.c" />
+    <ClCompile Include="..\src\2c.cpp" />
   </ItemGroup>
+  <Import Project="$(UMBA_LOCAL_LIBS_ROOT)\umba\.msvc\sources.props" />
+  <Import Project="$(UMBA_LOCAL_LIBS_ROOT)\sfmt\.msvc\sources.props" />
+  <Import Project="$(UMBA_LOCAL_LIBS_ROOT)\encoding\.msvc\sources.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
