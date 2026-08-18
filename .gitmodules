@@ -1,0 +1,6 @@
+[submodule ".umba.bat"]
+	path = .umba.bat
+	url = ../.umba.bat.git
+[submodule ".umba.cmake"]
+	path = .umba.cmake
+	url = ../.umba.cmake.git

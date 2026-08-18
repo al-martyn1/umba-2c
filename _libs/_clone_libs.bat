@@ -1,3 +1,6 @@
+@echo off
+setlocal enabledelayedexpansion
+
 @set ACC=al-martyn1
 @set BASE=github.com
 
@@ -24,10 +27,52 @@ goto DO_CLONE
 set PREFIX=git@%BASE%:%ACC%
 
 :DO_CLONE
+@set "GIT_OPTS=--recurse-submodules"
+@set "MAIN_REPO=%PREFIX%"
+@set "INPUT_FILE=%~dp0\libs.list"
+@set "LIB_ROOT=%~dp0"
+@if "%LIB_ROOT:~-1%"=="\" @set "LIB_ROOT=%LIB_ROOT:~,-1%"
 
-git clone %PREFIX%/2c_common.git          %~dp0\2c_common
-git clone %PREFIX%/umba_mm_mod_encodings.git   %~dp0\encoding
-git clone %PREFIX%/marty_cpp.git          %~dp0\marty_cpp
-git clone %PREFIX%/marty_utf.git          %~dp0\marty_utf
-git clone %PREFIX%/umba_mm_mod_sfmt.git   %~dp0\sfmt
-git clone %PREFIX%/umba_mm_mod_umba.git   %~dp0\umba
+
+for /f "tokens=1,2" %%A in (%INPUT_FILE%) do (
+    @echo.
+    @set first=%%A
+    @if /i "!first:~0,1!"=="#" (
+      @echo Skip %%A %%B
+    ) else (
+      @if "%%B"=="" (
+          call :process_single "%%A"
+      ) else (
+          call :process_double "%%A" "%%B"
+      )
+    )
+)
+@goto :eof
+
+:process_single
+echo git clone %GIT_OPTS% %MAIN_REPO%/%~1.git "%LIB_ROOT%\%~1"
+git clone %GIT_OPTS% %MAIN_REPO%/%~1.git %~1
+rem git submodule update --progress --init --recursive --merge
+@exit /B 0
+
+:process_double
+@set "value=%~2"
+@if /i "!value:~0,8!"=="https://" (
+  echo git clone %GIT_OPTS% %value% %~1
+  git clone %GIT_OPTS% %value% "%LIB_ROOT%\%~1"
+  @rem git submodule update --progress --init --recursive --merge
+) else if /i "!value:~0,7!"=="http://" (
+  echo git clone %GIT_OPTS% %value% "%LIB_ROOT%\%~1"
+  git clone %GIT_OPTS% %value% %~1
+  @rem git submodule update --progress --init --recursive --merge
+) else if /i "!value:~0,4!"=="git@" (
+  echo git clone %GIT_OPTS% %value% "%LIB_ROOT%\%~1"
+  git clone %GIT_OPTS% %value% %~1
+  @rem git submodule update --progress --init --recursive --merge
+) else (
+  echo git clone %GIT_OPTS% %MAIN_REPO%/%value%.git "%LIB_ROOT%\%~1"
+  git clone %GIT_OPTS% %MAIN_REPO%/%value%.git %~1
+  @rem git submodule update --progress --init --recursive --merge
+)
+
+@exit /B 0

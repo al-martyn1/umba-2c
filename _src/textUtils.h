@@ -4,7 +4,7 @@
 #include "marty_cpp/src_normalization.h"
 #include <string>
 
-// Используем старый код, лень переделывать
+// РСЃРїРѕР»СЊР·СѓРµРј СЃС‚Р°СЂС‹Р№ РєРѕРґ, Р»РµРЅСЊ РїРµСЂРµРґРµР»С‹РІР°С‚СЊ
 
 std::string prepareFileExtForMimeType(std::string ext)
 {

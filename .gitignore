@@ -47,3 +47,4 @@ _libs/umba
 /umba-2rcfs-help.txt
 /_libs/marty_utf
 *.user
+/.set_msvc.bat
