@@ -26,7 +26,7 @@ std::string makeAbsPath( std::string p )
     std::string basePath;
 
     if (optFiles.empty())
-        basePath = umba::filesys::getCurrentDirectory<std::string>();
+        basePath = umba::filesys::getCurrentDirectory();
     else
         basePath = umba::filename::getPath(optFiles.top());
 
@@ -47,6 +47,7 @@ int operator()( const std::string                               &a           //!
               , bool ignoreInfos
               )
 {
+    UMBA_USED(fBuiltin);
     //using namespace marty::clang::helpers;
 
     std::string dppof = "Don't parse predefined options from ";
@@ -59,6 +60,8 @@ int operator()( const std::string                               &a           //!
         //unsigned uintVal;
         std::size_t szVal;
         bool boolVal;
+
+        UMBA_USED(szVal);
 
         if (opt.name.empty())
         {
@@ -926,7 +929,11 @@ int operator()( const std::string                               &a           //!
                 {
                     auto helpText = opt.getHelpOptionsString();
                     std::cout << "Usage: " << argsParser.programLocationInfo.exeName
+                              #if !defined(UMBA_2RCFS)
+                              << " [OPTIONS] input_file [output_file]\n"
+                              #else
                               << " [OPTIONS] [output_file]\n"
+                              #endif
                               << "  If output_file not taken, STDOUT used\n"
                               << "\nOptions:\n\n"
                               << helpText;

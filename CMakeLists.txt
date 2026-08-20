@@ -44,6 +44,20 @@ set(COMMON_LIBS
     umba::umba
    )
 
+set (ZLIB_SRC "${LIB_ROOT}/zlib/adler32.c"
+              "${LIB_ROOT}/zlib/compress.c"
+              "${LIB_ROOT}/zlib/crc32.c"
+              "${LIB_ROOT}/zlib/deflate.c"
+              "${LIB_ROOT}/zlib/gzio.c"
+              "${LIB_ROOT}/zlib/infback.c"
+              "${LIB_ROOT}/zlib/inffast.c"
+              "${LIB_ROOT}/zlib/inflate.c"
+              "${LIB_ROOT}/zlib/inftrees.c"
+              "${LIB_ROOT}/zlib/trees.c"
+              "${LIB_ROOT}/zlib/uncompr.c"
+              "${LIB_ROOT}/zlib/zutil.c"
+    )
+
 
 file(GLOB_RECURSE sources   "${SRC_ROOT}/*.cpp")
 file(GLOB_RECURSE headers   "${SRC_ROOT}/*.h")
@@ -59,10 +73,25 @@ endif()
 
 set(COMMON_UMBA_OPTIONS "BIGOBJ" "UTF8" "PEDANTIC" "WERR") # "PEDANTIC"/"WALL" "WERR"
 
+add_library(zlib ${ZLIB_SRC})
+target_include_directories(zlib PRIVATE "${LIB_ROOT}")
+
 
 set(TARGET umba-2c)
-# add_executable(${TARGET} "${SRC_ROOT}/${TARGET}.cpp" "${sources}" "${headers}")
-add_executable(${TARGET} "${sources}" "${headers}")
+add_executable(${TARGET} "${SRC_ROOT}/${TARGET}.cpp" "${headers}")
 umba_add_target_options(${TARGET} ${COMMON_UMBA_OPTIONS} "CONSOLE") 
-target_link_libraries(${TARGET} PRIVATE "${PLATFORM_LIBS}" "${COMMON_LIBS}")
+target_link_libraries(${TARGET} PRIVATE "${PLATFORM_LIBS}" "${COMMON_LIBS}" zlib)
+
+
+set(TARGET umba-2rcfs)
+add_executable(${TARGET} "${SRC_ROOT}/${TARGET}.cpp" "${headers}")
+umba_add_target_options(${TARGET} ${COMMON_UMBA_OPTIONS} "CONSOLE") 
+target_link_libraries(${TARGET} PRIVATE "${PLATFORM_LIBS}" "${COMMON_LIBS}" zlib)
+
+
+set(TARGET mk-add-mime)
+add_executable(${TARGET} "${SRC_ROOT}/${TARGET}.cpp" "${SRC_ROOT}/mimes.cpp" "${headers}")
+umba_add_target_options(${TARGET} ${COMMON_UMBA_OPTIONS} "CONSOLE") 
+target_link_libraries(${TARGET} PRIVATE "${PLATFORM_LIBS}" "${COMMON_LIBS}" zlib)
+
 

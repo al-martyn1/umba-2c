@@ -80,14 +80,14 @@ std::string convertTextEncoding(const std::string &text, const AppConfig &appCfg
 
 //----------------------------------------------------------------------------
 inline
-std::string readFile(const std::string &inputFilename, const AppConfig &appCfg, bool binInput)
+std::string readFile(const std::string &inputFilename_, const AppConfig &appCfg, bool binInput)
 {
     std::vector<char> fileDataVec;
-    if (!umba::filesys::readFile(inputFilename, fileDataVec))
+    if (!umba::filesys::readFile(inputFilename_, fileDataVec))
     {
         // LOG_ERR_OPT << umba::formatMessage("Failed to open input file '$(filename)'").arg("filename",inputFilename).toString() << "\n";
         // return 2;
-        throw std::runtime_error( umba::formatMessage("Failed to open input file '$(filename)'").arg("filename", inputFilename).toString());
+        throw std::runtime_error( umba::formatMessage("Failed to open input file '$(filename)'").arg("filename", inputFilename_).toString());
     }
     std::string
     dataReaded = std::string(fileDataVec.data(), fileDataVec.size());
@@ -97,9 +97,9 @@ std::string readFile(const std::string &inputFilename, const AppConfig &appCfg, 
 
 //----------------------------------------------------------------------------
 inline
-std::string readFile(const std::string &inputFilename, const AppConfig &appCfg)
+std::string readFile(const std::string &inputFilename_, const AppConfig &appCfg)
 {
-    return readFile(inputFilename, appCfg, appCfg.binInput);
+    return readFile(inputFilename_, appCfg, appCfg.binInput);
 }
 
 //----------------------------------------------------------------------------

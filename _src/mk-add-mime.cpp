@@ -2,6 +2,8 @@
     \brief Генерируем --add-mime-type по уже изготовленной мапе mime-типов
  */
 
+#include "umba/umba.h"
+//
 #include "textUtils.h"
 
 #include "mimes.h"
@@ -15,6 +17,9 @@
 
 int main(int argc, char* argv[])
 {
+    UMBA_USED(argc);
+    UMBA_USED(argv);
+
     std::map<std::string, std::set<std::string> >  extByMimeType;
 
     {

@@ -9,6 +9,8 @@
 #include "umba/flag_helpers.h"
 #include "umba/regex_helpers.h"
 #include "umba/filename.h"
+//
+#include "marty_cpp/src_normalization.h"
 
 #include <time.h>
 
@@ -364,7 +366,19 @@ struct AppConfig
             {
                 struct stat t_stat;
                 stat(inputFilename.c_str(), &t_stat);
-                struct tm * timeinfo = gmtime(&t_stat.st_mtime); // or st_mtim? st_ctime or localtime() depending on what you want
+
+                struct tm * pTimeinfo = 0;
+
+            #if defined(WIN32) || defined(_WIN32)
+                // errno_t __CRTDECL gmtime_s(struct tm *_Tm, const time_t *_Time)   { return _gmtime32_s(_Tm, _Time); }
+                struct tm timeinfo;
+                auto err = gmtime_s(&timeinfo, &t_stat.st_mtime); // or st_mtim? st_ctime or localtime() depending on what you want
+                if (err==0)
+                    pTimeinfo = &timeinfo;
+            #else
+                //struct tm *gmtime_r(const time_t *timep, struct tm *result);
+                pTimeinfo = gmtime_r(&t_stat.st_mtime, &timeinfo);
+            #endif
     
                 // asctime - Www Mmm dd hh:mm:ss yyyy\n
                 // http    - <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
@@ -372,7 +386,7 @@ struct AppConfig
                 // https://en.cppreference.com/w/cpp/chrono/c/strftime
                
                 char buf[256];
-                std::size_t sz = strftime( buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", timeinfo );
+                std::size_t sz = strftime( buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", pTimeinfo );
                 buf[sz] = 0;
     
                 lastModified = buf;
@@ -487,8 +501,14 @@ struct AppConfig
                 return mergeLines(lines, outputLineFeed, false /* addTrailingNewLine */);
             }
 
+            case marty_cpp::ELinefeedType::detect : return text;
+            case marty_cpp::ELinefeedType::invalid: return text;
             default: return text;
         }
+
+
+        //return marty_cpp::normalizeCrLfToLf(text);
+        //StringType normalizeCrLfToLf(const StringType &str, ELinefeedType *pDetectedLinefeedType = 0)
     }
 
     std::string normalizeLinefeeds(const std::string &text) const
